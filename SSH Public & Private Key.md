@@ -25,7 +25,7 @@
 2. Alice 使用 Bob 的公钥加密她的消息，并传送给 Bob；
 3. Bob 使用他的私钥解密 Alice 的消息。
 
-![img](images/SSH Public & Private Key.images/2012072915191712.jpg)
+<img src="images/SSH Public & Private Key.images/2012072915191712.jpg" alt="img" style="zoom: 80%;" />
 
 ### 基于公钥的认证过程
 
@@ -36,7 +36,7 @@
 2. Alice 将签名的文件传送给 Bob；
 3. Bob 使用 Alice 的公钥解密文件，从而验证签名。
 
-![img](images/SSH Public & Private Key.images/2012072915193769.jpg)
+<img src="images/SSH Public & Private Key.images/2012072915193769.jpg" alt="img" style="zoom:80%;" />
 
 
 

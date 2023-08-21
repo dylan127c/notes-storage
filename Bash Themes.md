@@ -151,7 +151,7 @@ oh-my-posh init pwsh | Invoke-Expression
 
 主题配置即刻生效：
 
-![image-20230422173549345](images/Bash Themes.images/image-20230422173549345.png)
+<img src="images/Bash Themes.images/image-20230422173549345.png" alt="image-20230422173549345" style="zoom:50%;" />
 
 假如希望使用不同的主题，例如使用 oh-my-posh/themes/emodipt-extend.omp.json 主题配色，只需要打开配置文件，将内容更改为：
 
@@ -197,11 +197,8 @@ sudo vim /etc/bash.bashrc
 eval "$(oh-my-posh init bash --config ~/.poshthemes/emodipt-extend.omp.json)"
 ```
 
-![image-20230422175430673](images/Bash Themes.images/image-20230422175430673.png)
+<img src="images/Bash Themes.images/image-20230422175430673.png" alt="image-20230422175430673" style="zoom:50%;" />
 
 重新打开 Linux Bash 后，主题配置即生效：
 
 <img src="images/Bash Themes.images/image-20230422175517560.png" alt="image-20230422175517560" style="zoom:50%;" />
-
-### 现存问题
-

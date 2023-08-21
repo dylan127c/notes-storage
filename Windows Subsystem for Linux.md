@@ -118,7 +118,7 @@ cmd 'ver'
 
 WSL 程序默认存储在 C:\Windows\System32 目录中：
 
-![image-20230423070627519](images/Windows Subsystem for Linux.images/image-20230423070627519.png)
+<img src="images/Windows Subsystem for Linux.images/image-20230423070627519.png" alt="image-20230423070627519" style="zoom: 50%;" />
 
 该程序的企鹅图标即为 Linux 的典型标志。
 
@@ -218,7 +218,7 @@ wsl --list --verbose
 lsb_release -a
 ```
 
-![image-20230423080934388](images/Windows Subsystem for Linux.images/image-20230423080934388.png)
+<img src="images/Windows Subsystem for Linux.images/image-20230423080934388.png" alt="image-20230423080934388" style="zoom:50%;" />
 
 回到 PowerShell 中运行以下命令，可以更改默认启动的 Linux 发行版：
 
@@ -250,7 +250,7 @@ wsl --set-default-version '2'
 
 那么查看当前所有已安装的 Linux 发行版时，就可能出现 VERSION 为 1 的情况：
 
-![image-20230423083115568](images/Windows Subsystem for Linux.images/image-20230423083115568.png)
+<img src="images/Windows Subsystem for Linux.images/image-20230423083115568.png" alt="image-20230423083115568" style="zoom:50%;" />
 
 示例中 Ubuntu-22.04 发行版使用的 WSL 版本为 WSL1，所幸这并非无可挽救。
 
@@ -304,7 +304,7 @@ wsl --export 'Ubuntu-22.04' 'C:\Ubuntu-22.04.tar'
 wsl --import 'My-Ubuntu' 'I:\Virtual Machine' 'C:\Ubuntu-22.04.tar'
 ```
 
-![image-20230423090906831](images/Windows Subsystem for Linux.images/image-20230423090906831.png)
+<img src="images/Windows Subsystem for Linux.images/image-20230423090906831.png" alt="image-20230423090906831" style="zoom:50%;" />
 
 导入的 Linux 发行版会以导入时指定的发行版名称，出现在当前已安装的发行版列表中：
 
@@ -408,7 +408,7 @@ WSL 实则并未提供任何让 Linux 发行版随开机启动的放，但可以
 wsl --list --verbose
 ```
 
-![image-20230423094208011](images/Windows Subsystem for Linux.images/image-20230423094208011.png)
+<img src="images/Windows Subsystem for Linux.images/image-20230423094208011.png" alt="image-20230423094208011" style="zoom:50%;" />
 
 将看到 Ubuntu-22.04 发行版会一直处于 Running 状态。
 

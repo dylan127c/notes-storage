@@ -91,7 +91,7 @@ Git 使用 reset 命令进行版本回溯，有三种常用模式：1. mixed；2
 
 本节以图例的方式讲解以上三种常用模式。假设存在一个 Git 仓库，该仓库结构如下：
 
-![image-20230519052540099](images/Git Reset.images/image-20230519052540099.png)
+<img src="images/Git Reset.images/image-20230519052540099.png" alt="image-20230519052540099" style="zoom: 80%;" />
 
 接下来会分别使用 \--mixed、\--soft 和 \--hard 将当前版本回溯至 0ccc8e5 版本。
 
@@ -105,7 +105,7 @@ git reset --mixed 0ccc8e5
 
 回溯后的版本状态，将如下图所示：
 
-![image-20230519054603616](images/Git Reset.images/image-20230519054603616.png)
+<img src="images/Git Reset.images/image-20230519054603616.png" alt="image-20230519054603616" style="zoom:80%;" />
 
 可以简单地将 \--mixed 模式想象成复制粘贴：它会将当前版本的信息全数复制到剪切板中，在版本原原本本地回溯至目标版本后，再将剪切板的内容粘贴并覆盖其中。
 
@@ -129,7 +129,7 @@ git reset --soft 0ccc8e5
 
 回溯后的版本状态，将如下图所示：
 
-![image-20230519054701818](images/Git Reset.images/image-20230519054701818.png)
+<img src="images/Git Reset.images/image-20230519054701818.png" alt="image-20230519054701818" style="zoom:80%;" />
 
 实际上不难看出，以 \--soft 模式回溯版本时，它仅是在以 \--mixed 模式回溯版本的基础上，执行了将所有文件添加至暂存区的操作。
 
@@ -157,7 +157,7 @@ git reset --hard 0ccc8e5
 
 回溯后的版本状态，将如下图所示：
 
-![image-20230519055055972](images/Git Reset.images/image-20230519055055972.png)
+<img src="images/Git Reset.images/image-20230519055055972.png" alt="image-20230519055055972" style="zoom:80%;" />
 
 可以看到工作区目录是 clean 状态，同时工作区目录中仅存 12.txt 文件。
 
