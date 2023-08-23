@@ -440,7 +440,7 @@ public interface Annotation {
 
 Simple 注解类型实现了 Annotation 接口：
 
-<img src="images/First Page.images/image-20220819234205590.png" alt="image-20220819234205590" style="zoom:50%;" />
+<img src="images/First%20Page.images/image-20220819234205590.png" alt="image-20220819234205590" style="zoom:50%;" />
 
 采用匿名内部类实例化注解对象时，对象遵循所有类型继承自 Object 类型，因此 equal、hashCode 和 toString 方法都能从 Object 类中继承而来，剩下一个 annotationType 抽象方法是必须要求覆写的。
 
