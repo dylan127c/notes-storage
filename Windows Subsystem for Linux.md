@@ -360,7 +360,9 @@ wsl --terminate <distribution name>
 wsl --terminate 'Ubuntu-20.04'
 ```
 
-实际上，退出 Linux Bash 之后对应的 Linux 发行版会自动停止运行。不过存在一种特殊的方法，使用该方法能让 Linux 发行版保存运行状态，并随系统启动而自动运行。
+**实际上，退出 Linux Bash 之后对应的 Linux 发行版会自动停止运行。**
+
+不过存在一种特殊的方法，使用该方法能让 Linux 发行版保存运行状态，并随系统启动而自动运行。
 
 ### 访问 Linux 文件
 
