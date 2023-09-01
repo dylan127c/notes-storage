@@ -1,62 +1,67 @@
 ### 概述
 
-工欲善其事，必先利其器。本篇用于记录个人开发环境及系统环境的配置。
+本篇记录个人系统环境配置以及个人开发环境配置。
 
 ### 编程字体
 
-编程字体推荐，包括英文字体和中文字体两类。请在非商用的情况下，使用它们。
+编程字体推荐，包括英文字体和中文字体两类。**请在非商用的情况下使用它们。**
 
 - 英文字体推荐：[Cascadia Code](https://github.com/microsoft/cascadia-code/releases/download/v2111.01/CascadiaCode-2111.01.zip)、[SF Pro Text](https://fontsfree.net/?s=SF+Pro+Text)、[SF Pro Display](https://fontsfree.net/?s=SF+Pro+Display)、Consolas；
 
 - 中文字体推荐：[PingFang SC](/resources/PingFang%20SC.rar)、Microsoft YaHei。
 
-正如本页面所示，如果所有静态资源能够正常加载，那么所有中文都会使用 PingFang SC 字体显示。
+为了更正确地使用字体，需要了解关于后备字体（Fallback Font）的概念：**后备字体**（**Fallback Font**）是指在当时显示的字体缺乏某些字符时，被用于显示缺失字符的字体。因为其作为显示的最后一道防线，后备字体应该尽可能包含所有 Unicode 字符。
 
-英文字体部分会根据内容的不同，而有所差别。其中正文采用了 SF Pro Text 字体，标题采用了 SF Pro Display 字体，代码块则采用了 Cascadia Code 字体。
+当缺失字符没有后备字体用于显示时，通常会将缺失字符改为黑色方块、白色空心方块、问号、Unicode 占位字符（U+FFFD）显示，或者干脆略过该字符。在实务上，像是 CSS 等支持字体列表依序显示的系统，通常会将一或多套后备字体置入列表最后，以防止缺字的情况发生。
+
+假设某网页依赖 properties 文件中的 fontFamily 属性值来配置显示字体，且该文件中 fontFamily 属性如下：
 
 ```properties
-# 注释部分应用了 PingFang SC 字体和 Cascadia Code 字体
-name = dylan
-diableAuto = true
 fontFamily = Cascadia Code, PingFang SC
 ```
 
-注意到注释部分，如果觉得中英文字体之间不太和谐，那么可以通过 CSS 的类选择器来其应用其他的英文字体。
+那么由于 Cascadia Code 字体不支持中文字符，因此网页内的所有的中文字符都将使用 PingFang SC 字体（Fallback Font）显示，所有的英文字符将正常地使用 Cascadia Code 字体显示。
 
-针对 Cascadia Code 字体和 PingFang SC 字体有两点说明：
+如果希望 HTML 中的元素能拥有更细致的字体分类，可以选择使用 CSS 类选择器或 JS 来为指定的网页元素应用其他字体。
 
-- Cascadia Code 有几个不同的变体，具体区别可以参考[ Cascadia Code ](https://learn.microsoft.com/zh-cn/windows/terminal/cascadia-code)版本；
-- PingFang SC 中 Medium 字重的显示效果比 Regular 要好，可以将 Medium 字重的 font-weight 设置为 400（标准）。
+针对 Cascadia Code 和 PingFang SC 有以下两点说明：
 
-如果希望在 Windows 系统程序中使用它们，请获取它们的 .ttf 字体文件，并在右键菜单选择“为所有用户安装”：
+- Cascadia Code 字体有几个不同的版本可供选择，具体区别可参考[ Cascadia Code 版本](https://learn.microsoft.com/zh-cn/windows/terminal/cascadia-code)，一般使用 Cascadia Code 版本即可；
+- PingFang SC 字体中 Medium 字重的显示效果比 Regular 要好。
+
+如果希望在 Windows 系统中使用这些字体，则需要获取对应的字体文件并安装。
+
+安装字体时，需要在字体文件的右键菜单中选择“为所有用户安装”：
 
 <img src="images/Personal%20Workspace.images/image-20230415031552086.png" alt="image-20230415031552086" style="zoom: 50%;" />
 
-关于字体，想了解更多可以参考：[Fonts](./Fonts.md)。
-
 ### 程序配置
 
-以下是常用软件的一些常用配置信息。
+以下是常用软件的一些配置详情。
 
 #### IntelliJ IDEA
+
+以下配置针对 IntelliJ IDEA 2022.1.3 版本：
+
+<img src="images/Personal%20Workspace.images/image-20230831014701375.png" alt="image-20230831014701375" style="zoom: 50%;" />
 
 中文语言包：
 
 <img src="images/Personal%20Workspace.images/image-20230415041226585.png" alt="image-20230415041226585" style="zoom:33%;" />
 
-主题 One Dark Theme：
+主题：
 
 <img src="images/Personal%20Workspace.images/image-20230415040035469.png" alt="image-20230415040035469" style="zoom:33%;" />
 
-外观选项卡：
+外观：
 
 <img src="images/Personal%20Workspace.images/image-20230415040331453.png" alt="image-20230415040331453" style="zoom:33%;" />
 
-字体选项卡：
+字体：
 
 <img src="images/Personal%20Workspace.images/image-20230415041133315.png" alt="image-20230415041133315" style="zoom:33%;" />
 
-配色方案选项卡：
+配色方案：
 
 <img src="images/Personal%20Workspace.images/image-20230415040803985.png" alt="image-20230415040803985" style="zoom:33%;" />
 
@@ -282,8 +287,6 @@ https://translate.google.com/#view=home&op=translate&sl=zh-CN&tl=en&text={query}
 
 这里需要注意 Windows 系统下，文件路径中使用的是反斜杠“\”，如果错误输入了斜杠“/”，则无法检索到结果。
 
-获取 Listary 请参考：[Listary 6.1](/resources/Listary%20v6.1.0.38.rar)。
-
 #### Parsec
 
 Parsec 是依赖代理服务的远程控制软件，可以说大多数情况下必须提供代理，以登录 Parsec 账户以使用其功能。
@@ -335,7 +338,9 @@ TUN Mode 配置：
 
 #### MacType
 
-MacType 是一个替代 Windows 自身核心部件 GDI 进行字体渲染的开源软件。该软件由中国网友 FlyingSnow 基于已经停止更新的 gdi++ 开发，使用可配置性较高的 FreeType 渲染字体。
+MacType 是一个替代 Windows 自身核心部件 GDI 进行字体渲染的开源软件。
+
+该软件由中国网友 FlyingSnow 基于已经停止更新的 gdi++ 开发，使用可配置性较高的 FreeType 渲染字体。
 
 软件安装后，推荐以注册表方式启动：
 
