@@ -485,7 +485,9 @@ Hi dylan127c! You've successfully authenticated, but GitHub does not provide she
 
 #### 直接更改
 
-许多服务否可以通过修改相关的配置文件，来更改服务的默认端口号。如 OpenSSH：
+许多服务否可以通过修改相关的配置文件，来更改服务的默认端口号，例如修改 OpenSSH 的默认端口。
+
+找到 OpenSSH 配置文件并打开：
 
 ```bash
 vi /etc/ssh/sshd_config
@@ -505,28 +507,28 @@ systemctl restart sshd
 
 #### 间接更改
 
-利用 firewalld 提供的端口转发功能，可以达到间接修改服务端口的目的。例如，使用 firewalld 的端口转发功能实现 SSH 的非标准端口访问：
+利用 firewalld 提供的端口转发功能，可以达到间接修改服务端口的目的。例如，使用 firewalld 的端口转发功能实现 SSH 的非标准端口访问。
 
-1. 从 public 区域中剔除 ssh 服务：
+从 public 区域中剔除 ssh 服务：
 
 ```bash
 firewall-cmd --zone=public --remove-service=ssh --permanent
 ```
 
-2. 将 443/tcp 添加到 public 区域中，同时确保 22/tcp 不存在于 public 区域中：
+将 443/tcp 添加到 public 区域中，同时确保 22/tcp 不存在于 public 区域中：
 
 ```bash
 firewall-cmd --zone=public --add-port=443/tcp --permanent
 firewall-cmd --zone=public --remove-port=22/tcp --permanent
 ```
 
-3. 配置端口转发，具体命令如下：
+配置端口转发，具体命令如下：
 
 ```bash
 firewall-cmd --zone=public --add-forward-port=port=443:proto=tcp:toport=22
 ```
 
-4. 配置完成后，可以选择查看一下 public 区域的详细信息：
+配置完成后，可以选择查看一下 public 区域的详细信息：
 
 ```
 public (active)
@@ -544,7 +546,7 @@ public (active)
   rich rules:
 ```
 
-5. 客户端即可通过 443 端口远程连接至 CentOS 系统：
+客户端即可通过 443 端口远程连接至 CentOS 系统：
 
 <img src="images/CentOS%207.images/image-20230904060031328.png" alt="image-20230904060031328" style="zoom:50%;" />
 
