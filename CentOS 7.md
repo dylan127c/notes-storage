@@ -257,7 +257,7 @@ firewall-cmd --zone=public --list-all
 firewall-cmd --list-all
 ```
 
-**但建议尽量提供** `--zone` **参数，以免不必要的错误。**以上命令的输出如下：
+<b>但建议尽量提供</b> `--zone` <b>参数，以免不必要的错误。</b>以上命令的输出如下：
 
 ```
 public (active)
