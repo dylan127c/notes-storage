@@ -25,6 +25,18 @@ CentOS Linux release 7.9.2009 (Core)
 
 CentOS 系统安装完毕或完成基本网络、软件配置之后，建议对虚拟机进行“保存快照”操作，以便在系统崩溃或重建坏境时能迅速利用快照对恢复系统。注意，创建快照务必在虚拟机处于“关机”状态下进行，处于“运行”或“挂起”状态的虚拟机所生成的快照虽然可以回溯，但无法克隆。
 
+关机命令：
+
+```bash
+shutdown -h now
+```
+
+重启命令：
+
+```bash
+reboot
+```
+
 ### 网络
 
 多数情况下，选择 CentOS 系统是为了完成某些软件的模拟，例如测试 Redis、MySQL 等。无一例外，基本都会选择使用 OpenSSH 来连接 CentOS 系统。
@@ -82,7 +94,7 @@ lo              65536       20      0      0 0            20      0      0      
 
 其中 Iface 列会出了所有网络接口的名称。
 
-#### 动态 IP 地址
+#### 1. 动态地址
 
 以 root 管理员身份登录 CentOS 系统，修改网络配置文件 ifcfg-ens33：
 
@@ -135,13 +147,13 @@ ip addr
 ping -c 4 www.baidu.com
 ```
 
-#### 静态 IP 地址
+#### 2. 静态地址
 
 以 root 管理员身份登录 CentOS 系统，修改网络配置文件 ifcfg-ens33：
 
 - 将“ONBOOT=no”键值对改为“ONBOOT=yes”，这表示启动虚拟机时自动连接网络；
 - 将“BOOTPROTO=dhcp”键值对改为“BOOTPROTO=static”，这表示使用静态 IP 地址，不再动态获取；
-- 新增 IPADDR、GATEWAY、NETMASK 和 DNS1 等四个键值对，它们分别表示 IP 地址、默认网关、子网掩码和 DNS 服务器。
+- 新增 IPADDR、GATEWAY、NETMASK 和 DNS1 等四个键值对，它们分别表示 IP 地址、默认网关、子网掩码和 DNS 服务器（可省略）。
 
 ```shell
 TYPE=Ethernet
@@ -175,6 +187,17 @@ systemctl restart network
 
 推荐使用静态 IP 地址，以方便远程主机连接到 Linux 系统。
 
+#### 3. 故障排查
+
+以下是几个在配置完静态 IP 地址后，系统网络仍旧出现异常可能原因：
+
+- 默认网关配置错误；
+- IP 地址存在冲突；
+- 网络没有在系统启动时自动连接；
+- 虚拟机设置中的网络适配器并非使用桥接模式，这可能会导致 IP 地址、默认网关等信息无法正确匹配当前的网络模式。
+
+不管网络适配器处于什么模式，系统以动态 DHCP 获取 IP 地址时，一般能够解决绝大部分网络异常的问题。但非静态的 IP 地址始终会增加 Linux 系统作为服务端使用时的连接成本，请尽量使用静态 IP 地址。
+
 ### 远程连接
 
 SSH 是最常见和最安全的远程控制方式之一，它提供了加密的 Shell 访问。您可以使用 SSH 客户端从本地计算机远程连接到 Linux 服务器，并使用命令行执行操作。OpenSSH 是 SSH 协议的免费实现，通常预装在大多数 Linux 发行版中。
@@ -183,13 +206,8 @@ SSH 是最常见和最安全的远程控制方式之一，它提供了加密的 
 
 以下命令可查看 CentOS 系统下 SSH 服务的运行状态：
 
-```bash
-systemctl status sshd
 ```
-
-一般输出如下：
-
-```
+~]# systemctl status sshd
 ● sshd.service - OpenSSH server daemon
    Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2023-09-03 19:10:07 CST; 8min ago
@@ -219,47 +237,49 @@ ssh '192.168.1.110' -l 'root'
 
 ### 防火墙
 
-CentOS 7 系统中使用了全新的防火墙软件 firewalld 以取代 iptables 工具，它带来了区域（Zone）的概念。区域本质上是针对进入系统的流量而建立规则列表，其中每个网络接口（Network Interface）都必须至少分配至某个区域中。
+防火墙是保护机器不受来自外部垃圾流量骚扰的一种方式，它允许用户通过定义一组防火墙规则来控制主机上的入站流量（Inbound Traffic）。这些规则一般会对入站流量进行分类，以分类结果来判断需要阻断流量还是允许流量进站。
 
-多数情况下，修改防火墙的配置等同于修改区域的配置。以下命令用于查看所有的防火墙区域：
+这里需要稍微说明一下入站流量和出站流量：
 
-```bash
-firewall-cmd --get-zones
-```
+- 入站流量（Inbound Traffic）就是**流入**特定网络、服务器、网站或应用程序的数据流量；
+- 出站流量（Outbound Traffic）就是从特定网络、服务器、网站或应用程序**流出**的数据流量。
 
-默认情况下 CentOS 包含 9 个区域，但目前仅需要了解 public 区域。public 是默认区域，每个网络接口都会被优先分配至该区域：
+<img src="images/CentOS%207.images/image-20230905223109517.png" alt="image-20230905223109517" style="zoom:50%;" />
 
-```bash
-firewall-cmd --get-default-zone
-```
+其中，入站流量也可以译作 Incoming Traffic，出站流量也可以译作 Outgoing Traffic。
 
-查看指定网络接口目前被分配到的区域，可以使用以下命令：
+firewalld（CentOS 7 新特性）是一个防火墙服务守护进程，它通过 D-Bus 接口提供动态的、可定制的主机防火墙。由于防火墙是动态的，这意味着在每次启用、修改或删除规则时不需要重启防火墙守护进程。
 
-```bash
-firewall-cmd --get-zone-of-interface=<interface-name>
-```
+firewalld 使用区域（Zones）和服务（Services）两个概念来简化防火墙的流量管理：
 
-例如，获取网络接口 ens33 目前被分配到的区域：
+- Zones 是预定义的规则集，规则集中定义了流量进站的规则，所有的网络接口（网卡）都可以分配给区域。流量是否被允许入站取决于当前计算机使用的网络接口及该接口所隶属的区域类型；
+- Services 实际是包含在 Zones 里面的一些预定义规则，这些规则仅允许特定服务流量的入站。例如，允许 SSH 流量进站，只需要将 ssh 服务添加到 Services 中，不再需要使用命令去放行 22 端口。
 
-```bash
-firewall-cmd --get-zone-of-interface=ens33
-```
-
-查看 public 区域的详细信息：
-
-```bash
-firewall-cmd --zone=public --list-all
-```
-
-注意，参数 `--zone` 不提供时，它会默认被填充为 `--zone=<default-zone>`。目前的默认区域为 public，即意味着以上命令等价于：
-
-```bash
-firewall-cmd --list-all
-```
-
-<b>但建议尽量提供</b> `--zone` <b>参数，以免不必要的错误。</b>以上命令的输出如下：
+CentOS 系统中默认存在 9 个不同的区域：
 
 ```
+~]# firewall-cmd --get-zones
+block dmz drop external home internal public trusted work
+```
+
+这里只需要了解 public 区域，该区域是网络接口被默认分配至的区域：
+
+```
+~]# firewall-cmd --get-default-zone
+public
+```
+
+查询指定网络接口（网卡）所属区域的命令（例如 ens33 网卡）：
+
+```
+~]# firewall-cmd --get-zone-of-interface=ens33
+public
+```
+
+查询指定区域其具体规则集的命令（例如 public 区域）：
+
+```
+~]# firewall-cmd --zone=public --list-all
 public (active)
   target: default
   icmp-block-inversion: no
@@ -277,14 +297,25 @@ public (active)
 
 其中：
 
-- interfaces：表示目前分配至 public 区域的网络接口；
-- services：表示目前已被允许直接通过 public 区域的服务。
+- interfaces：表示当前有哪些网络接口（网卡）遵循当前区域的规则集。例如 ens33 网卡；
+- services：表示当前区域中允许哪些服务的流量入站。例如 ssh 服务；
+- ports：表示当前区域中允许哪些端口的什么类型的流量入站，例如 22/tcp，它表示允许 22 端口的 TCP 流量入站；
+- protocols：表示当前区域中允许哪些类型的流量入站。例如 tcp 或 udp 协议流量；
+- forward-ports：表示当前区域中的端口转发配置。
 
-可以看到 ssh 服务隶属于 public 区域中被允许的服务之一，这意味着所有来自 OpenSSH 的流量都可以直接通过防火墙而不被阻截。
+注意命令中的 `--zone` 选项，该选项存在默认值 `<default-zone>`。本例中 public 是默认区域，则以下两条命令在本例中等价：
+
+```bash
+firewall-cmd --zone=public --list-all
+```
+
+```bash
+firewall-cmd --list-all
+```
 
 #### 1. 添加或移除服务
 
-使用 firewalld 不可避免需要接触到添加或移除端口的命令：
+使用 firewalld 添加或移除端口的命令：
 
 ```bash
 firewall-cmd --zone=public --add-service=<service-name>
@@ -315,34 +346,37 @@ public (active)
   rich rules:
 ```
 
-可以看到 ssh 服务已经不存在于 public 区域，同时 OpenSSH 客户端也无法连接到 CentOS 系统：
+可以看到 ssh 服务已经不存在于 public 区域了，同时 OpenSSH 客户端也无法连接到 CentOS 系统：
 
 <img src="images/CentOS%207.images/image-20230904034045564.png" alt="image-20230904034045564" style="zoom:50%;" />
 
-所幸使用这种方式只能临时将 ssh 服务从 public 区域中移除，重启防火墙服务或系统后，public 区域的规则将会恢复。
+注意，以上命令只能将 ssh 服务从 public 区域中**临时移除**。因为几乎所有涉及到修改区域规则集的命令，都需要进行保存才能持久生效。在防火墙服务或系统重启后，未保存的修改都会丢失。
 
-如果希望永久移除 ssh 服务，则需要在移除 ssh 服务后再执行一条命令：
+如果希望修改能持久写入规则集中，可以使用以下命令保存修改：
 
 ```bash
 firewall-cmd --zone=public --runtime-to-permanent
 ```
 
-该命令会将当前 public 区域的规则作为默认规则永久写入，即便重启防火墙服务或系统，新写入的规则也不会丢失。
+或在修改规则时加上 `--permanent` 选项：
 
-其次，添加某些服务到 public 区域中，需要先确认服务存在于预定义服务（Predefined Services）列表中。以下命令用于查看所有的预定义服务：
+```bash
+firewall-cmd --zone=public --remove-service=ssh --permanent
+```
+
+添加服务到指定的区域中，需要先确认该服务是否存在于预定义服务（Predefined Services）列表中。查看所有的预定义服务：
 
 ```bash
 firewall-cmd --get-services
 ```
 
-一些常用的服务诸如 redis、mysql、git、mssql、http 或 https 等均包含在这个预定义服务列表中。有需要可以将某些服务添加至 public 区域中：
+一些常用的服务诸如 redis、mysql、git、mssql、http 或 https 等一般都被包含在预定义服务列表中。以下是添加预定义服务的命令：
 
 ```bash
-firewall-cmd --zone=public --add-service=<service-name>
-firewall-cmd --zone=public --runtime-to-permanent
+firewall-cmd --zone=public --add-service=<service-name> --permanent
 ```
 
-查看所有已允许的服务可以使用以下命令：
+查看某区域内所有已允许的服务：
 
 ```bash
 firewall-cmd --zone=public --list-services
@@ -350,89 +384,75 @@ firewall-cmd --zone=public --list-services
 
 #### 2. 添加或移除端口
 
-如果预定义服务列表中不存在你需要的服务，那么还可以选择开放端口。添加或移除端口的命令如下：
+假如预定义服务列表中不存在你需要的服务，同时你不想大费周章地添加自定义服务，那么还可以选择修改区域的端口配置：
 
 ```bash
 firewall-cmd --zone=public --add-port=<port-number/port-type>
 firewall-cmd --zone=public --remove-port=<port-number/port-type>
 ```
 
-假设 ssh 服务不存在于 public 区域，但已知 ssh 服务运行在 22 端口。那么可以选择直接将 22 端口添加到 public 区域中：
+其中 `port-type` 可以是 tcp 或 udp 等。
+
+假设 ssh 服务不存在于 public 区域，但已知 ssh 服务运行在 22 端口。那么可以选择将 22 端口添加到 public 区域中：
 
 ```bash
-firewall-cmd --zone=public --remove-service=ssh
 firewall-cmd --zone=public --add-port=22/tcp
 ```
 
 这样 OpenSSH 客户端同样能够成功连接至 CentOS 系统。
 
-查看所有已允许的端口可以使用以下命令：
+查看某区域内所有已允许的端口：
 
 ```bash
 firewall-cmd --zone=public --list-ports
 ```
 
-#### 3. 将规则永久写入
+#### 3.  防火墙相关命令
 
-几乎所有添加或移除服务、端口的命令都是临时生效的命令，如果希望规则能永久写入区域中，则需要在执行这些命令后运行以下命令：
-
-```bash
-firewall-cmd --zone=public --runtime-to-permanent
-```
-
-该命令会将当前 public 区域的规则作为默认规则永久写入，即便重启防火墙服务或系统，新写入的规则也不会丢失。但每次持久化规则都需要使用两条命令是十分繁琐的，因此 firewalld 还提供了另一种方式将规则永久写入：`--permanent` 选项。
-
-在每次执行添加或移除服务、端口的命令时加上 `--permanent` 选项，规则就能即刻永久写入区域中。例如，永久添加 22 端口：
+firewalld 本身只提供了查询状态和重新加载防火墙服务两种命令：
 
 ```bash
-firewall-cmd --zone=public --add-port=22/tcp --permanent
+firewall-cmd --state
+firewall-cmd --reload
 ```
 
-或永久移除 ssh 服务：
+显然在管理防火墙服务方面不太够用，这里推荐使用 systemctl 来管理 firewalld 服务。
 
-```bash
-firewall-cmd --zone=public --remove-service=ssh --permanent
-```
-
-#### 4. 防火墙相关命令
-
-推荐使用 systemctl 来管理 firewalld 服务。
-
-查看防火墙状态的命令如下：
+查看防火墙状态：
 
 ```bash
 systemctl status firewalld
 ```
 
-重启防火墙的命令如下：
+重启防火墙服务：
 
 ```bash
 systemctl restart firewalld
 ```
 
-开启防火墙命令如下：
+完全开启防火墙：
 
 ```bash
-# 启用 firewalld 服务
+# 启用服务
 systemctl unmask firewalld
 
-# 启动 firewalld 服务
+# 启动服务
 systemctl start firewalld
 
-# 自启 firewalld 服务
+# 服务自启
 systemctl enable firewalld
 ```
 
-关闭防火墙命令如下：
+完全关闭防火墙：
 
 ```bash
-# 关闭 firewalld 服务
+# 关闭服务
 systemctl stop firewalld
 
-# 禁止 firewalld 自启
+# 禁止自启
 systemctl disable firewalld
 
-# 禁用 firewalld 服务
+# 禁用服务
 systemctl mask firewalld
 ```
 
@@ -444,115 +464,160 @@ systemctl mask firewalld
 
 ### 端口转发
 
-端口转发是一个比较有意思的内容，这里单独拿出来说明一下，该功能同样是 firewalld 提供的，端口转发能够将某些端口的流量重定向至其他端口，以达到间接更改某些服务端口的目的，例如将 SSH 协议的端口修改为非标准端口。
+端口转发（Port Forwarding）是一个比较有意思的功能，这里单独拿出来说一下。端口转发能够将某些端口的流量重定向至其他端口，这样除了能达到隐匿真是端口的目的外，还能间接达到更改某些标准服务端口的目的。
 
-实际上，有很多服务器并不开放标准的 SSH 端口（Port 22），这是出于系统安全性的考虑。诚然 SSH 是一种强大的远程访问协议，但伴随而来的同样是巨大的风险，能够访问 Shell 就意味着能够对系统作出修改，服务器管理员有必要采取各种措施，来减小潜在的安全风险。
+例如，有很多的服务器并不对外开放标准的 SSH 端口，这是出于系统安全性的考虑。诚然 SSH 是一种强大的远程访问协议，但伴随而来的是巨大的风险，能够访问 Shell 就意味着能够对系统作出更改，因此服务器管理员有必要采取各种措施，来减小潜在的安全风险。
 
-多数情况下，将服务端口修改为非标准端口是为了获取更高的系统安全性，但也不乏有其他的例外。
+虽然多数情况下，将服务端口修改为非标准端口是为了获取更高的系统安全性，但不乏也有其他的例外。
 
-熟悉 GitHub 的话，应该知道他们提供了一个使用 443 端口连接的 ssh.github.com 主机，其内部的实现原理虽不得而知，但总之它使用了非标准的 SSH 端口。显然 GitHub 这样做的目的不是出于系统安全性的考虑，因为无论主机还是接口都仍然是处于完全公开的状态。
+熟悉 GitHub 的话，应该知道他们提供了一个使用 443 端口连接的 ssh.github.com 主机，其内部的实现原理虽不得而知，但这里用到了非标准的 SSH 端口。显然 GitHub 这样做的目的不是出于系统安全性的考虑，因为无论主机还是接口都仍然是处于完全公开的状态。
 
-这里猜测其目的是为了防止使用标准的 SSH 端口时出现不必要的错误，所以才提供了另一个主机及非标准的端口的连接方式。类似这样的错误：
+这里猜测其目的是为了预防使用标准 SSH 端口时出现的未知错误，一旦出现未知错误，新主机及非标准端口也许能派上用场。类似的未知错误：
 
 ```
 kex_exchange_identification: Connection closed by remote host
 Connection closed by UNKNOWN port 65535
 ```
 
-以上错误出现在使用代理服务器连接 GitHub 服务器时：
+最近一次出现该位置错误，是在使用代理服务器连接 GitHub 服务器时：
 
 ```bash
 ssh -T git@github.com -p 22 -o 'ProxyCommand "e:/Git/mingw64/bin/connect.exe" -S 127.0.0.1:13766 %h %p'
 ```
 
-这无疑是一件非常反直觉的事情，使用代理服务器却无法连接 GitHub 服务器着实有点不可思议，但它就是发生了。最为离谱的是这个错误十分难以排查，且明明一切看起来都十分正常。
+这无疑是一件非常反直觉的事情，使用代理服务器却无法连接 GitHub 着实是有点不可思议，但它就是发生了。同时，这个未知错误十分难以排查。错误显然是与身份验证相关的，但你永远无法知道到底是代理服务关闭了连接，还是远程服务器关闭了连接，更甚者还可能是连接在传输过程中意外被关闭。
 
-无奈只能凭经验判断，而最可能出现问题的环节是代理服务器。猜测是代理服务器上使用了某种策略禁止了 SSH 流量的中继，从而导致了连接错误。说到禁止中继 SSH 流量的策略，那么也可能只是简单地监测客户端需要访问的目标端口号是否为 22 端口。
+这种情况下只能凭经验判断，明显最可能出现问题的环节是代理服务器。猜测代理服务器上使用了某种策略禁止 SSH 流量的中继，从而导致了连接错误。其禁止中继 SSH 流量的策略，可能仅是监测客户端需要访问的目标端口号是否为 22 端口。
 
-如果真如猜测一般，那么 GitHub 提供的 443 端口可能非常有用：
+如果真如猜测一般，GitHub 提供的 443 端口可能非常有用：
 
 ```bash
 ssh -T git@ssh.github.com -p 443 -o 'ProxyCommand "e:/Git/mingw64/bin/connect.exe" -S 127.0.0.1:13766 %h %p'
 ```
 
-在更换主机和端口后，本地客户端顺利连接上了 GitHub 服务器：
+更换主机和端口后，本地客户端顺利连接上了 GitHub 服务器：
 
 ```
 Hi dylan127c! You've successfully authenticated, but GitHub does not provide shell access.
 ```
 
-尽管出现错误的真实原因不得而知，但总算问题得到了解决，显然非标准端口有些时候也是十分有用的。
+尽管出现错误的真实原因仍旧无法得知，但无论如何，问题算是得到了解决，这恰好从侧面说明了非标准端口的作用。
 
-#### 直接更改
+一般服务都可以通过修改相关的配置文件以达到修改服务所使用的默认端口号的目的，这里就不过多说明。本节主要了解一下如何使用端口转发功能，将任意服务的标准端口映射为非标准端口。
 
-许多服务否可以通过修改相关的配置文件，来更改服务的默认端口号，例如修改 OpenSSH 的默认端口。
+#### 1. 端口转发大致原理
 
-找到 OpenSSH 配置文件并打开：
+端口转发（[Port Forwarding](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-port_forwarding)）实际上很容易理解，它本质是将指定端口所接收到的入站流量转发到本机或其他主机的特定端口上，特定端口上的服务监听到流量并作出响应后，响应流量将按原路返回至客户端。
 
-```bash
-vi /etc/ssh/sshd_config
-```
-
-在 OpenSSH 配置文件中找到 `#Port 22` 并将其修改为：
-
-```
-Port 443
-```
-
-重启 OpenSSH 服务后配置即刻生效：
-
-```
-systemctl restart sshd
-```
-
-#### 间接更改
-
-利用 firewalld 提供的端口转发功能，可以达到间接修改服务端口的目的。例如，使用 firewalld 的端口转发功能实现 SSH 的非标准端口访问。
-
-从 public 区域中剔除 ssh 服务：
+假如服务端 192.168.1.110 支持 SSH 连接，那么本地客户端一般能使用以下命令建立连接：
 
 ```bash
-firewall-cmd --zone=public --remove-service=ssh --permanent
+ssh '192.168.1.110' -p 22 -l 'root'
 ```
 
-将 443/tcp 添加到 public 区域中，同时确保 22/tcp 不存在于 public 区域中：
+假设服务端开启了端口转发，将 38921 端口的流量转发到本机的 22 端口：
 
 ```bash
-firewall-cmd --zone=public --add-port=443/tcp --permanent
-firewall-cmd --zone=public --remove-port=22/tcp --permanent
+firewall-cmd -add-forward-port=port=38921:proto=tcp:toport=22
 ```
 
-配置端口转发，具体命令如下：
+并从 public 区域中剔除 ssh 服务，同时仅将 38921 端口添加至区域的 ports 中：
 
 ```bash
-firewall-cmd --zone=public --add-forward-port=port=443:proto=tcp:toport=22
+firewall-cmd --remove-service=ssh
+firewall-cmd --add-port=38921/tcp
 ```
 
-配置完成后，可以选择查看一下 public 区域的详细信息：
+那么本地客户端如果希望再次与服务端 192.168.1.110 建立 SSH 连接，就需要稍微修改一下连接命令：
 
-```
-public (active)
-  target: default
-  icmp-block-inversion: no
-  interfaces: ens33
-  sources:
-  services: dhcpv6-client
-  ports: 443/tcp
-  protocols:
-  masquerade: no
-  forward-ports: port=443:proto=tcp:toport=22:toaddr=
-  source-ports:
-  icmp-blocks:
-  rich rules:
+```bash
+ssh '192.168.1.110' -p 38921 -l 'root'
 ```
 
-客户端即可通过 443 端口远程连接至 CentOS 系统：
+这实际就是一个简单的端口转发实例，服务端将 38921 端口所接收的 SSH 流量转发给了 22 端口：
 
-<img src="images/CentOS%207.images/image-20230904060031328.png" alt="image-20230904060031328" style="zoom:50%;" />
+```
+192.168.1.110:38921 ====port forward===> 192.168.1.110:22
+```
 
-#### 端口占用
+<img src="images/CentOS%207.images/image-20230905232330692.png" alt="image-20230905232330692" style="zoom: 50%;" />
 
-端口被占用时可以执行如下操作：
+端口转发除了支持将流量转发至本机，还支持将流量转发至其他主机。
+
+假设服务端 192.168.1.111 是服务端 192.168.1.110 局域网中的一台主机，现在：
+
+- 客户端 192.168.1.188 能够和服务端 192.168.1.110 建立连接，但无法和服务端 192.168.1.111 建立连接；，
+- 服务端 192.168.1.110 和 192.168.1.111 之间能够建立连接。
+
+如果希望客户端能够连接至 192.168.1.111 服务端，那么可以选择在 192.168.1.110 服务端上配置端口转发：
+
+```bash
+firewall-cmd -add-forward-port=port=38922:proto=tcp:toport=22:toaddr=192.168.1.111
+```
+
+非本机的流量转发需要 masquerade 功能的支持：
+
+```bash
+firewall-cmd --add-masquerade
+```
+
+那么客户端只需要使用以下命令即可连接到 192.168.1.111 服务端上的 SSH 服务：
+
+```bash
+ssh '192.168.1.110' -p 38922 -l 'root'
+```
+
+这就相当于将 192.168.1.110 服务端上 38922 端口接收的流量，转发至 192.168.1.111 服务端的 22 端口：
+
+```
+192.168.1.110:38922 ====port forward===> 192.168.1.111:22
+```
+
+#### 2. 添加端口转发规则
+
+为本机添加端口转发规则：
+
+```bash
+firewall-cmd --add-forward-port=port=<port-number>:proto=<tcp|udp|sctp|dccp>:toport=<port-number>
+```
+
+为其他主机添加端口转发规则：
+
+```bash
+firewall-cmd --add-forward-port=port=<port-number>:proto=<tcp|udp|sctp|dccp>:toport=<port-number>:toaddr=<IP>
+```
+
+```bash
+firewall-cmd --add-masquerade
+```
+
+#### 3. 移除端口转发规则
+
+移除为本机添加的端口转发规则：
+
+```bash
+firewall-cmd --remove-forward-port=port=<port-number>:proto=<tcp|udp|sctp|dccp>:toport=<port-number>
+```
+
+移除为其他主机添加的端口转发规则：
+
+```bash
+firewall-cmd --remove-forward-port=port=<port-number>:proto=<tcp|udp|sctp|dccp>:toport=<port-number>:toaddr=<IP>
+```
+
+```bash
+firewall-cmd --remove-masquerade
+```
+
+#### 4. 注意事项
+
+firewalld 提供的端口转发功能只适用于 IPv4 网络，对于 IPv6 网络来说，完成端口转发需要使用 rich rules，更多信息：[Rich Language](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/configuring_complex_firewall_rules_with_the_rich-language_syntax)。
+
+其次是 masquerade 功能，为其他主机添加端口转发规则时需要开启该功能，更多信息：[Configuring Masquerading](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-configuring_ip_address_masquerading)。
+
+### 端口占用
+
+使用 Linux 部署服务时，偶尔会遇到端口被占的情况，以下是相关的处理命令：
 
 ```shell
 # 查看目前监听的端口，如果没有 netstat，可以使用“yum -y install net-tools”进行安装
