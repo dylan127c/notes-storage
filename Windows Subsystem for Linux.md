@@ -55,15 +55,15 @@ PowerShell 命令书写如下：
 cd 'h:\proxy rules'
 ```
 
-Bash 命令书写如下：
+Bash 命令书写如下（反斜杆用于转义空格符号）：
 
 ```bash
 cd /h/proxy\ rules
 ####### OR #######
-cd '/h/proxy rulse'
+cd '/h/proxy rules'
 ```
 
-以上使用单引号的命令同时兼容使用双引号，但使用双引号的命令不兼容使用单引号。其次，对于不包含空格符号的参数来说，单引号或双引号可省略不写。
+以上使用单引号的命令同时兼容使用双引号，但使用双引号的命令不兼容使用单引号，简单来说就是 CMD 命令不能使用单引号。其次，对于不包含空格符号的参数来说，单引号或双引号可省略不写。
 
 例如以下命令：
 
@@ -83,7 +83,7 @@ wsl --install --distribution 'Ubuntu'
 
 对于大多数 Windows 10 或以上版本的系统来说，它们都已经默认支持 WSL 了，可以通过区分系统版本，来判断目前系统支持的 WSL 版本有什么。
 
-不同版本的 WSL 并不是非此即彼的存在，同一个 Windows 系统可同时兼容 WLS 1 和 WSL2。
+不同版本的 WSL 之间并不是非此即彼的存在，同一个 Windows 系统中可同时兼容 WLS 1 和 WSL2。
 
 | 功能                                           | WSL 1 | WSL 2 |
 | :--------------------------------------------- | :---- | :---- |
@@ -124,7 +124,7 @@ WSL 程序默认存储在 C:\Windows\System32 目录中：
 
 虽然 WSL 程序已存在于系统中，但实际尚未可用，直接调用往往只能看到一个一闪而过的终端窗口。
 
-因为调用 wsl.exe 程序时，它需要间接启动当前默认的 Linux 发行版，显然系统尚未安装任何的 Linux 发行版，这意味着现在调用 wsl.exe 程序毫无用处。
+因为调用 wsl.exe 程序时，它需要间接启动当前默认的 Linux 发行版，这意味着如果系统尚未安装任何的 Linux 发行版，那调用 wsl.exe 程序便毫无用处。
 
 一种更为浅显的理解，可以把 WSL 看作连接 Windows 系统和 Linux 系统的桥梁，即使用 WSL 可以在 Windows 上建立与 Linux 系统的高效连接。
 
@@ -210,7 +210,7 @@ wsl --list --verbose
 
 查看 Linux 发行版信息时，不难留意到位于行首的 * 标志。它表示当前调用 wsl.exe 程序时，默认使用的 Linux 发行版是什么。
 
-例如上述例子中，默认的 Linux 发行版为 Ubuntu-22.04，这意味着调用 wsl.exe 程序时，就会启动并使用 Ubuntu-22.04 发行版。
+上述例子中，默认的 Linux 发行版为 Ubuntu-22.04，这意味着调用 wsl.exe 程序时，就会启动并使用 Ubuntu-22.04 发行版。
 
 进入 wsl.exe 程序后，运行以下命令可以查询 Ubuntu 系统的版本号：
 
@@ -354,15 +354,15 @@ wsl --shutdown
 wsl --terminate <distribution name>
 ```
 
-例如终止 Ubuntu-20.04 发行版的运行：
+例如，仅终止 Ubuntu-20.04 发行版的运行：
 
 ```shell
 wsl --terminate 'Ubuntu-20.04'
 ```
 
-**实际上，退出 Linux Bash 之后对应的 Linux 发行版会自动停止运行。**
+**实际上，退出 Linux Bash 之后对应的 Linux 发行版会在数秒后自动停止运行。**
 
-不过存在一种特殊的方法，使用该方法能让 Linux 发行版保存运行状态，并随系统启动而自动运行。
+不过存在一种特殊的方法，使用该方法能让 Linux 发行版保存运行状态，并让其能够随 Windows 系统的启动而自动运行。
 
 ### 访问 Linux 文件
 
@@ -382,15 +382,15 @@ wsl --terminate 'Ubuntu-20.04'
 
 Linux 发行版的虚拟驱动器通常名为 ext4.vhdx 且被存储在 AppData 内相关的 WSL 目录中，这种虚拟驱动器通常可以被挂载。
 
-不过官方不建议使用任何 Windows 工具或编辑器修改、移动或访问 AppData 目录中的 WSL 相关文件。使用路径访问 Linux 文件的方式，是官方所推荐的唯一访问形式。
+不过官方不建议使用任何 Windows 工具或编辑器修改、移动或访问 AppData 目录中的 WSL 相关文件，这可能导致 Linux 系统损坏。使用路径访问 Linux 文件，是官方所推荐的唯一访问形式。
 
 但该形式存在一个问题，Linux 发行版在不使用时总是处于 Stopped 状态：
 
 <img src="images/Windows%20Subsystem%20for%20Linux.images/image-20230423093332898.png" alt="image-20230423093332898" style="zoom:50%;" />
 
-如果目标发行版处于 Stopped 状态，那么访问该发行版的系统文件时，WSL 需先将该发行版启动，随后 Windows 系统才能到发行版文件。
+如果目标发行版处于 Stopped 状态，那么访问该发行版的系统文件时，WSL 需先将该发行版启动，随后 Windows 系统才能到发行版文件，这显然需要耗费一定的时间。
 
-换言之，如果目标 Linux 发行版尚未启动，那么直接访问目标 Linux 文件就会出现卡顿的情况。
+最为直观的体验是：如果目标 Linux 发行版尚未启动，那么直接访问目标 Linux 文件时就会出现卡顿的情况。
 
 ### 自启 Linux 发行版
 
@@ -418,7 +418,7 @@ wsl --list --verbose
 
 ### 修改 root 密码
 
-默认情况下，安装 Linux 发行版后，系统内默认的 root 密码是随机的，这意味着每次开机都会有一个新的 root 密码。为便于使用，需要变更发行版 root 用户的密码为固定的。
+默认情况下，安装 Linux 发行版（Ubuntu 系统）后，该系统内默认的 root 密码是随机的，这意味着每次开机都会有一个新的 root 密码。为便于使用，推荐修改默认 Linux 发行版的 root 用户密码为固定密码。
 
 进入 Linux Bash 中使用以下命令修改当前用于的密码：
 
@@ -445,5 +445,3 @@ whoami
 测试 root 用户密码的可用性：
 
 <img src="images/Windows%20Subsystem%20for%20Linux.images/image-20230423084836756.png" alt="image-20230423084836756" style="zoom:50%;" />
-
-显然 root 用户密码已成功变更。

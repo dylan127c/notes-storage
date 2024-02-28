@@ -208,7 +208,7 @@ eval "$(oh-my-posh init bash)"
 同样，更换配置只需要添加 config 参数以指定主题样式文件的存储路径：
 
 ```bash
-eval "$(oh-my-posh init bash --config /e/oh-my-posh/themes/emodipt-extend.omp.json)"
+eval "$(oh-my-posh init bash --config '/e/oh my posh/themes/emodipt-extend.omp.json')"
 ```
 
 <img src="images/Oh%20My%20Posh.images/image-20230422174757360.png" alt="image-20230422174757360" style="zoom:50%;" />

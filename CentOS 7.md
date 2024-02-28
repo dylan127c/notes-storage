@@ -2,7 +2,7 @@
 
 本篇记录 CentOS 7 Minimal 版本安装后的一些基本配置。
 
-当前使用的 CentOS 为 7.9 版本。CentOS 系统下可以使用以下命令查看系统具体的发行版版本信息：
+查看系统具体的发行版：
 
 ```bash
 cat /etc/centos-release
@@ -14,46 +14,60 @@ cat /etc/centos-release
 CentOS Linux release 7.9.2009 (Core)
 ```
 
-### 环境要求
+### 版本环境
 
 - VMware Workstation 16 Pro（16.2.3 build-19376536）
-- CentOS 7（CentOS-7-x86_64-DVD-2009）
+- CentOS 7.9（CentOS-7-x86_64-DVD-2009）
 
 ### 安装
 
-在 VMware Workstation 中选择 CentOS 7 镜像，类型选择“最小化安装”即可。
+VMware Workstation 中选择 CentOS 7 镜像，类型选择“最小化安装”。
 
-CentOS 系统安装完毕或完成基本网络、软件配置之后，建议对虚拟机进行“保存快照”操作，以便在系统崩溃或重建坏境时能迅速利用快照对恢复系统。注意，创建快照务必在虚拟机处于“关机”状态下进行，处于“运行”或“挂起”状态的虚拟机所生成的快照虽然可以回溯，但无法克隆。
+CentOS 系统安装完毕或完成基本网络、软件配置之后，强烈建议对虚拟机进行“保存快照”操作，以便在系统崩溃或重建坏境时能迅速利用快照对恢复系统。
 
-关机命令：
+注意，创建快照时务必让虚拟机处于“关机”状态，如果虚拟机处于“运行”或“挂起”状态，那么虚拟机所生成的快照只能用于“回溯”，无法用于“克隆”。
+
+### 基础命令
+
+关机：
 
 ```bash
 shutdown -h now
 ```
 
-重启命令：
+重启：
 
 ```bash
-reboot
+shutdown -r now
+```
+
+如果不添加 now 参数，那么系统将会向所有用户发送一个关机或重启通知，并在一定时间后关机或重启。这段时间通常是一分钟，但具体取决于系统配置。
+
+如果已经运行了 shutdown 命令但未添加 now 参数，那么可以在一定的时间内取消关机或重启：
+
+```bash
+shutdown -c
 ```
 
 ### 网络
 
-多数情况下，选择 CentOS 系统是为了完成某些软件的模拟，例如测试 Redis、MySQL 等。无一例外，基本都会选择使用 OpenSSH 来连接 CentOS 系统。
+多数情况下，选择 CentOS 系统是为了完成某些软件的模拟，例如测试 Redis、MySQL 等。为了便于使用命令行操作，一般会使用 OpenSSH 连接 CentOS 系统。
 
-本地客户端需要连接到 CentOS 虚拟机，那么 CentOS 系统必须首先拥有可用网络。由于某些 CentOS 版本默认不提供网络服务，这就不可避免地需要了解如何手动配置 CentOS 系统的网络。
+宿主机如果需要连接到 CentOS 虚拟机，那么 CentOS 必须首先拥有可用网络。由于某些 CentOS 版本默认不提供网络服务，这不可避免地需要了解如何手动配置 CentOS 系统的网络。
 
-首先，务必确认 VMware 软件“编辑 - 虚拟网络编辑器 - 更改设置”下拥有三种不同的网络：
+首先，请务必确认 VMware 软件“编辑 - 虚拟网络编辑器 - 更改设置”下拥有三种不同的网络：
 
 <img src="images/CentOS%207.images/image-20230903171816941.png" alt="image-20230903171816941" style="zoom:50%;" />
 
-同时注意类型为桥接模式的 VMnet0 网络，确认其所桥接的网卡为当前物理主机所使用的网卡。
+注意，类型为“桥接模式”的 VMnet0 网络，必须确保它所桥接的网卡为当前宿主机所使用的网卡。
 
-其次，推荐将虚拟机设置中网络适配器一项修改为桥接模式（自动），这样方便后续设置静态 IP 地址：
+其次，推荐将虚拟机设置中网络适配器修改为“桥接模式（自动）”，这便于后续为虚拟机配置静态 IP 地址：
 
 <img src="images/CentOS%207.images/image-20230903185131946.png" alt="image-20230903185131946" style="zoom:50%;" />
 
-CentOS 系统的网络配置文件一般存储在 `/etc/sysconfig/network-scripts/` 目录下，文件名称由特定前缀 `ifcfg-` 和网络接口（Network Interface）名称两部分共同组成。其中，网络接口名称的格式会因 Linux 发行版、系统配置和网络设备的不同而有所不同，CentOS 系统中的网络接口名称一般为 ens33。
+CentOS 系统的网络配置文件一般存储在 `/etc/sysconfig/network-scripts/` 目录下，文件名称由特定前缀 `ifcfg-` 和网络接口（Network Interface）名称两部分共同组成。
+
+网络接口名称的格式会因 Linux 发行版、系统配置和网络设备的不同而有所不同，CentOS 系统中的网络接口名称一般为 ens33。
 
 查看网络接口名可以使用以下命令：
 
@@ -75,7 +89,7 @@ ip link show
 - `lo` ：回环接口，它一个特殊的网络接口，通常在所有的现代操作系统中都存在；
 - `ens33`：具体的物理或虚拟以太网接口，网络配置主要针对的就是这个网络接口。
 
-由此可知当前 CentOS 系统的网络配置文件将被命名为 ifcfg-ens33。
+由此可知当前 CentOS 的网络配置文件的命名为 ifcfg-ens33。
 
 除此之外，系统如果安装了 net-tools 工具集，那么也可以使用以下命令查看网络接口：
 
@@ -92,13 +106,15 @@ ens33            1500      110      0      0 0           103      0      0      
 lo              65536       20      0      0 0            20      0      0      0 LRU
 ```
 
-其中 Iface 列会出了所有网络接口的名称。
+其中 Iface（Interface）列会出了所有网络接口的名称。
 
 #### 1. 动态地址
 
-以 root 管理员身份登录 CentOS 系统，修改网络配置文件 ifcfg-ens33：
+以 root 管理员身份登录 CentOS 修改网络配置文件 ifcfg-ens33：
 
-- 只需要将“ONBOOT=no”键值对改为“ONBOOT=yes”即可，这表示启动虚拟机时自动连接网络。
+- 将“ONBOOT=no”键值对改为“ONBOOT=yes”
+
+这表示在虚拟机启动时，网络将自动连接。
 
 ```bash
 # 系统一般自带vi编辑器
@@ -123,7 +139,7 @@ DEVICE=ens33
 ONBOOT=yes # 将 no 改为 yes，表示开机时自动连接网络
 ```
 
-重启网络服务（network.service），使配置生效：
+重启网络服务（network.service），配置立即生效：
 
 ```bash
 systemctl restart network
@@ -149,7 +165,7 @@ ping -c 4 www.baidu.com
 
 #### 2. 静态地址
 
-以 root 管理员身份登录 CentOS 系统，修改网络配置文件 ifcfg-ens33：
+以 root 管理员身份登录 CentOS 修改网络配置文件 ifcfg-ens33：
 
 - 将“ONBOOT=no”键值对改为“ONBOOT=yes”，这表示启动虚拟机时自动连接网络；
 - 将“BOOTPROTO=dhcp”键值对改为“BOOTPROTO=static”，这表示使用静态 IP 地址，不再动态获取；
@@ -185,7 +201,7 @@ DNS1=192.168.1.2
 systemctl restart network
 ```
 
-推荐使用静态 IP 地址，以方便远程主机连接到 Linux 系统。
+推荐使用静态 IP 地址，以便宿主机通过 OpenSSH 连接到 Linux 系统。
 
 #### 3. 故障排查
 
@@ -194,20 +210,20 @@ systemctl restart network
 - 默认网关配置错误；
 - IP 地址存在冲突；
 - 网络没有在系统启动时自动连接；
-- 虚拟机设置中的网络适配器并非使用桥接模式，这可能会导致 IP 地址、默认网关等信息无法正确匹配当前的网络模式。
+- 虚拟机设置中网络适配器未选择桥接模式，这会导致 IP 地址、默认网关等信息无法正确匹配当前的网络模式。
 
 不管网络适配器处于什么模式，系统以动态 DHCP 获取 IP 地址时，一般能够解决绝大部分网络异常的问题。但非静态的 IP 地址始终会增加 Linux 系统作为服务端使用时的连接成本，请尽量使用静态 IP 地址。
 
 ### 远程连接
 
-SSH 是最常见和最安全的远程控制方式之一，它提供了加密的 Shell 访问。您可以使用 SSH 客户端从本地计算机远程连接到 Linux 服务器，并使用命令行执行操作。OpenSSH 是 SSH 协议的免费实现，通常预装在大多数 Linux 发行版中。
+SSH 是最常见和最安全的远程控制方式之一，它提供了加密的 Shell 访问。可以使用 SSH 客户端从本地计算机远程连接到 Linux 服务器，并使用命令行执行操作。OpenSSH 是 SSH 协议的免费实现，通常预装在大多数 Linux 发行版中。
 
-毫无疑问，CentOS 系统同样预装了 OpenSSH，它提供了 SSH 的客户端和服务端，其中 SSH 服务端大多数时候为默认开机启动的状态。
+CentOS 系统同样预装了 OpenSSH，它同时提供了 SSH 的客户端和服务端，其中服务端大多数时候默认开机启动。
 
-以下命令可查看 CentOS 系统下 SSH 服务的运行状态：
+以下命令可查看 CentOS 下的 SSH 服务的运行状态：
 
 ```
-~]# systemctl status sshd
+# systemctl status sshd
 ● sshd.service - OpenSSH server daemon
    Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2023-09-03 19:10:07 CST; 8min ago
@@ -225,7 +241,7 @@ Sep 03 19:10:07 localhost.localdomain systemd[1]: Started OpenSSH server daemon.
 
 从输出中可以清晰看到，目前 CentOS 系统中的 sshd.service 服务处于运行中的状态，使用的端口号为 22。
 
-Windows 系统下打开 PowerShell 终端，在安装了 OpenSSH 客户端的前提下可以使用以下命令连接 CentOS 系统：
+Windows 系统下打开 PowerShell 终端，在安装了 OpenSSH 客户端的前提下，以下命令用于连接 CentOS 系统：
 
 ```bash
 ssh '192.168.1.110' -l 'root'
@@ -234,6 +250,26 @@ ssh '192.168.1.110' -l 'root'
 连接时会要求输入指定用户的登录密码，本例以 root 的身份远程连接并登录 CentOS 系统：
 
 <img src="images/CentOS%207.images/image-20230903192620178.png" alt="image-20230903192620178" style="zoom:50%;" />
+
+连接命令可以简写成 scp 式：
+
+```bash
+ssh 'root@192.168.1.110'
+```
+
+如果不提供任何用户名，且不存在配置文件，则连接默认使用目前登录宿主机系统的用户名。
+
+例如，Windows 系统下的如果登录的用户名为 dylan，那么：
+
+```bash
+ssh '192.168.1.110'
+```
+
+等价于：
+
+```bash
+ssh 'dylan@192.168.1.110'
+```
 
 ### 防火墙
 
@@ -246,7 +282,7 @@ ssh '192.168.1.110' -l 'root'
 
 <img src="images/CentOS%207.images/image-20230905223109517.png" alt="image-20230905223109517" style="zoom:50%;" />
 
-其中，入站流量也可以译作 Incoming Traffic，出站流量也可以译作 Outgoing Traffic。
+其中，入站流量还可以译作 Incoming Traffic，出站流量可以译作 Outgoing Traffic。
 
 firewalld（CentOS 7 新特性）是一个防火墙服务守护进程，它通过 D-Bus 接口提供动态的、可定制的主机防火墙。由于防火墙是动态的，这意味着在每次启用、修改或删除规则时不需要重启防火墙守护进程。
 
@@ -303,7 +339,7 @@ public (active)
 - protocols：表示当前区域中允许哪些类型的流量入站。例如 tcp 或 udp 协议流量；
 - forward-ports：表示当前区域中的端口转发配置。
 
-注意命令中的 `--zone` 选项，该选项存在默认值 `<default-zone>`。本例中 public 是默认区域，则以下两条命令在本例中等价：
+注意命令中的 `--zone` 选项，该选项存在默认值 `<default-zone>`。本例中 public 是默认区域，那么以下两条命令在本例中等价：
 
 ```bash
 firewall-cmd --zone=public --list-all
@@ -331,6 +367,7 @@ firewall-cmd --zone=public --remove-service=ssh
 再次查看 public 区域的详细信息：
 
 ```
+~]# firewall-cmd --zone=public --list-all
 public (active)
   target: default
   icmp-block-inversion: no
@@ -364,13 +401,17 @@ firewall-cmd --zone=public --runtime-to-permanent
 firewall-cmd --zone=public --remove-service=ssh --permanent
 ```
 
-添加服务到指定的区域中，需要先确认该服务是否存在于预定义服务（Predefined Services）列表中。查看所有的预定义服务：
+添加服务到指定的区域中，需要先确认该服务是否存在于预定义服务（Predefined Services）列表中。
+
+查看所有的预定义服务：
 
 ```bash
 firewall-cmd --get-services
 ```
 
-一些常用的服务诸如 redis、mysql、git、mssql、http 或 https 等一般都被包含在预定义服务列表中。以下是添加预定义服务的命令：
+一些常用的服务诸如 redis、mysql、git、mssql、http 或 https 等一般都被包含在预定义服务列表中。
+
+添加预定义服务的命令：
 
 ```bash
 firewall-cmd --zone=public --add-service=<service-name> --permanent
@@ -384,7 +425,7 @@ firewall-cmd --zone=public --list-services
 
 #### 2. 添加或移除端口
 
-假如预定义服务列表中不存在你需要的服务，同时你不想大费周章地添加自定义服务，那么还可以选择修改区域的端口配置：
+假如预定义服务列表中不存在目标服务，为了避免大费周章地添加自定义服务，还可以选择修改区域的端口配置：
 
 ```bash
 firewall-cmd --zone=public --add-port=<port-number/port-type>
@@ -393,7 +434,7 @@ firewall-cmd --zone=public --remove-port=<port-number/port-type>
 
 其中 `port-type` 可以是 tcp 或 udp 等。
 
-假设 ssh 服务不存在于 public 区域，但已知 ssh 服务运行在 22 端口。那么可以选择将 22 端口添加到 public 区域中：
+假设 ssh 服务不存在于 public 区域中，已知 ssh 服务运行在 22 端口。那么可以选择将 22 端口添加到 public 区域中：
 
 ```bash
 firewall-cmd --zone=public --add-port=22/tcp
@@ -430,7 +471,7 @@ systemctl status firewalld
 systemctl restart firewalld
 ```
 
-完全开启防火墙：
+完全开启防火墙（命令需顺序执行）：
 
 ```bash
 # 启用服务
@@ -443,7 +484,7 @@ systemctl start firewalld
 systemctl enable firewalld
 ```
 
-完全关闭防火墙：
+完全关闭防火墙（命令需顺序执行）：
 
 ```bash
 # 关闭服务
@@ -464,9 +505,11 @@ systemctl mask firewalld
 
 ### 端口转发
 
-端口转发（Port Forwarding）是一个比较有意思的功能，这里单独拿出来说一下。端口转发能够将某些端口的流量重定向至其他端口，这样除了能达到隐匿真是端口的目的外，还能间接达到更改某些标准服务端口的目的。
+firewalld 服务所提供的端口转发（[Port Forwarding](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-port_forwarding)）功能较为有趣，它能够将某些端口的流量重定向至本机或其他主机的其他端口上。这样做不仅可以隐匿某些服务的真实端口号，还能间接改变某些服务的标准端口号。
 
 例如，有很多的服务器并不对外开放标准的 SSH 端口，这是出于系统安全性的考虑。诚然 SSH 是一种强大的远程访问协议，但伴随而来的是巨大的风险，能够访问 Shell 就意味着能够对系统作出更改，因此服务器管理员有必要采取各种措施，来减小潜在的安全风险。
+
+<img src="images/CentOS%207.images/image-20230905232330692-1693944517771-1.png" alt="image-20230905232330692" style="zoom: 50%;" />
 
 虽然多数情况下，将服务端口修改为非标准端口是为了获取更高的系统安全性，但不乏也有其他的例外。
 
@@ -482,17 +525,17 @@ Connection closed by UNKNOWN port 65535
 最近一次出现该位置错误，是在使用代理服务器连接 GitHub 服务器时：
 
 ```bash
-ssh -T git@github.com -p 22 -o 'ProxyCommand "e:/Git/mingw64/bin/connect.exe" -S 127.0.0.1:13766 %h %p'
+ssh -T 'git@github.com' -p 22 -o 'ProxyCommand "e:/Git/mingw64/bin/connect.exe" -S 127.0.0.1:13766 %h %p'
 ```
 
 这无疑是一件非常反直觉的事情，使用代理服务器却无法连接 GitHub 着实是有点不可思议，但它就是发生了。同时，这个未知错误十分难以排查。错误显然是与身份验证相关的，但你永远无法知道到底是代理服务关闭了连接，还是远程服务器关闭了连接，更甚者还可能是连接在传输过程中意外被关闭。
 
-这种情况下只能凭经验判断，明显最可能出现问题的环节是代理服务器。猜测代理服务器上使用了某种策略禁止 SSH 流量的中继，从而导致了连接错误。其禁止中继 SSH 流量的策略，可能仅是监测客户端需要访问的目标端口号是否为 22 端口。
+这种情况下只能凭经验判断，最可能出现问题的环节是代理服务器。猜测代理服务器上使用了某种策略禁止 SSH 流量的中继，从而导致了连接错误。其禁止中继 SSH 流量的策略，可能仅是监测客户端需要访问的目标端口号是否为 22 端口。
 
 如果真如猜测一般，GitHub 提供的 443 端口可能非常有用：
 
 ```bash
-ssh -T git@ssh.github.com -p 443 -o 'ProxyCommand "e:/Git/mingw64/bin/connect.exe" -S 127.0.0.1:13766 %h %p'
+ssh -T 'git@ssh.github.com' -p 443 -o 'ProxyCommand "e:/Git/mingw64/bin/connect.exe" -S 127.0.0.1:13766 %h %p'
 ```
 
 更换主机和端口后，本地客户端顺利连接上了 GitHub 服务器：
@@ -503,53 +546,61 @@ Hi dylan127c! You've successfully authenticated, but GitHub does not provide she
 
 尽管出现错误的真实原因仍旧无法得知，但无论如何，问题算是得到了解决，这恰好从侧面说明了非标准端口的作用。
 
-一般服务都可以通过修改相关的配置文件以达到修改服务所使用的默认端口号的目的，这里就不过多说明。本节主要了解一下如何使用端口转发功能，将任意服务的标准端口映射为非标准端口。
+一般服务都可以通过修改相关的配置文件以达到修改服务所使用的默认端口号的目的，这里就不过多说明。本篇主要了解一下如何使用端口转发功能，将任意服务的标准端口映射为非标准端口。
 
-#### 1. 端口转发大致原理
+注意，firewalld 防火墙服务是 CentOS 7 的新特性，这意味着旧版本的 Centos 系统上不存在该服务。实际上，多数的 Linux 系统可以使用 iptables 工具来完成端口转发的配置。
 
-端口转发（[Port Forwarding](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-port_forwarding)）实际上很容易理解，它本质是将指定端口所接收到的入站流量转发到本机或其他主机的特定端口上，特定端口上的服务监听到流量并作出响应后，响应流量将按原路返回至客户端。
+#### 1. 大致原理
 
-假如服务端 192.168.1.110 支持 SSH 连接，那么本地客户端一般能使用以下命令建立连接：
+firewalld 服务所提供的端口转发功能实际上很容易理解，它本质是将指定端口所接收到的入站流量转发到本机或其他主机的特定端口上，特定端口上的服务在监听到流量并作出响应后，响应流量也将按原路返回至客户端。
+
+较为简单的是本地端口转发：
+
+<img src="images/CentOS%207.images/image-20230907033259431.png" alt="image-20230907033259431" style="zoom:50%;" />
+
+这种端口转发仅相当于将本机某个开放端口上的流量，转发至其他不开放的端口。
+
+假如服务端 `192.168.1.110` 支持 SSH 连接，那么本地客户端一般能使用以下命令建立连接：
 
 ```bash
-ssh '192.168.1.110' -p 22 -l 'root'
+ssh 'root@192.168.1.110' -p 22
 ```
 
-假设服务端开启了端口转发，将 38921 端口的流量转发到本机的 22 端口：
+但如果服务端 `192.168.1.110` 开启了端口转发，将 `38921` 端口的流量转发到本机的 `22` 端口：
 
 ```bash
 firewall-cmd -add-forward-port=port=38921:proto=tcp:toport=22
 ```
 
-并从 public 区域中剔除 ssh 服务，同时仅将 38921 端口添加至区域的 ports 中：
+并从 public 区域中剔除 ssh 服务，同时仅将 `38921` 端口添加至区域的 ports 中：
 
 ```bash
 firewall-cmd --remove-service=ssh
 firewall-cmd --add-port=38921/tcp
 ```
 
-那么本地客户端如果希望再次与服务端 192.168.1.110 建立 SSH 连接，就需要稍微修改一下连接命令：
+那么本地客户端如果希望再次与服务端 `192.168.1.110` 建立 SSH 连接，就需要稍微修改一下连接命令：
 
 ```bash
-ssh '192.168.1.110' -p 38921 -l 'root'
+ssh 'root@192.168.1.110' -p 38921
 ```
 
-这实际就是一个简单的端口转发实例，服务端将 38921 端口所接收的 SSH 流量转发给了 22 端口：
+这实际就是一个简单的端口转发实例，服务端将 `38921` 端口所接收的 SSH 流量转发给了 `22` 端口：
 
 ```
 192.168.1.110:38921 ====port forward===> 192.168.1.110:22
 ```
 
-<img src="images/CentOS%207.images/image-20230905232330692.png" alt="image-20230905232330692" style="zoom: 50%;" />
+端口转发除了支持将流量转发至本机，还支持将流量转发至其他主机：
 
-端口转发除了支持将流量转发至本机，还支持将流量转发至其他主机。
+<img src="images/CentOS%207.images/image-20230907033338947.png" alt="image-20230907033338947" style="zoom:50%;" />
 
-假设服务端 192.168.1.111 是服务端 192.168.1.110 局域网中的一台主机，现在：
+假设服务端 `192.168.1.111` 是服务端 `192.168.1.110` 局域网中的一台主机，现在：
 
-- 客户端 192.168.1.188 能够和服务端 192.168.1.110 建立连接，但无法和服务端 192.168.1.111 建立连接；，
-- 服务端 192.168.1.110 和 192.168.1.111 之间能够建立连接。
+- 客户端 `192.168.1.188` 能够和服务端 `192.168.1.110` 建立连接，但无法和服务端 `192.168.1.111` 建立连接；
+- 服务端 `192.168.1.110` 和 `192.168.1.111` 之间能够建立连接。
 
-如果希望客户端能够连接至 192.168.1.111 服务端，那么可以选择在 192.168.1.110 服务端上配置端口转发：
+如果希望客户端能够连接至 `192.168.1.111` 服务端，那么可以选择在 `192.168.1.110` 服务端上配置端口转发：
 
 ```bash
 firewall-cmd -add-forward-port=port=38922:proto=tcp:toport=22:toaddr=192.168.1.111
@@ -561,19 +612,19 @@ firewall-cmd -add-forward-port=port=38922:proto=tcp:toport=22:toaddr=192.168.1.1
 firewall-cmd --add-masquerade
 ```
 
-那么客户端只需要使用以下命令即可连接到 192.168.1.111 服务端上的 SSH 服务：
+那么客户端只需要使用以下命令即可连接到 `192.168.1.111` 服务端上的 SSH 服务：
 
 ```bash
-ssh '192.168.1.110' -p 38922 -l 'root'
+ssh 'root@192.168.1.110' -p 38922
 ```
 
-这就相当于将 192.168.1.110 服务端上 38922 端口接收的流量，转发至 192.168.1.111 服务端的 22 端口：
+这就相当于将 `192.168.1.110` 服务端上 `38922` 端口接收的流量，转发至 `192.168.1.111` 服务端的 `22` 端口：
 
 ```
 192.168.1.110:38922 ====port forward===> 192.168.1.111:22
 ```
 
-#### 2. 添加端口转发规则
+#### 2. 添加规则
 
 为本机添加端口转发规则：
 
@@ -591,7 +642,7 @@ firewall-cmd --add-forward-port=port=<port-number>:proto=<tcp|udp|sctp|dccp>:top
 firewall-cmd --add-masquerade
 ```
 
-#### 3. 移除端口转发规则
+#### 3. 移除规则
 
 移除为本机添加的端口转发规则：
 
@@ -668,7 +719,3 @@ ln -s /usr/share/zoneinfo/PRC /etc/localtime
 ```
 
 之后再查看本地时间，你会发现已经更改为 CST 了。
-
-
-
-但如果你是在 CentOS 中部署 Docker，将 MySQL 数据库服务部署在 Docker 容器内，尽管宿主机 3306 端口映射容器内 3306 端口，但此时仍旧不需要开放 3306 端口，MySQL 数据库服务依然能被访问。

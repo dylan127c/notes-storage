@@ -12,7 +12,7 @@
 
 本篇出于“快速部署简单虚拟机环境”的目的，记录虚拟机系统的部署过程。
 
-### 环境配置
+### 版本环境
 
 - VMware Workstation 16 Pro（16.2.3 build-19376536）
 - Ubuntu 22.04.2（ubuntu-22.04.2-desktop-amd64）
