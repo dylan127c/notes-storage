@@ -31,8 +31,6 @@ Hyper-V 是微软提出的一种系统管理程序虚拟化技术，能够实现
 
 <img src="images/Hyper-V%20&%20Easy-GPU-PV.images/image-20220812161638752.png" alt="image-20220812161638752" style="zoom:67%;" />
 
-
-
 此外，还需要以管理员身份打开终端，将管理程序启动类型设置为 AUTO：
 
 ```bash
@@ -49,9 +47,9 @@ bcdedit /set hypervisorlaunchtype auto
 bcdedit /set hypervisorlaunchtype off
 ```
 
-自 VMware Workstation 15.5.5 版本之后，支持在开启 Hyper-V 模式下运行！
+自 VMware Workstation 15.5.5 版本之后，VM 支持在开启 Hyper-V 模式下运行！
 
-详情参考：[VMware Workstation 15.5 Now Supports Host Hyper-V Mode](https://blogs.vmware.com/workstation/2020/05/vmware-workstation-now-supports-hyper-v-mode.html)。
+详情参阅：[VMware Workstation 15.5 Now Supports Host Hyper-V Mode](https://blogs.vmware.com/workstation/2020/05/vmware-workstation-now-supports-hyper-v-mode.html)。
 
 <img src="images/Hyper-V%20&%20Easy-GPU-PV.images/image-20230423011137400.png" alt="image-20230423011137400" style="zoom:50%;" />
 
