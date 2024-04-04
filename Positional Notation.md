@@ -4,7 +4,7 @@
 
 一种进位制中可以使用的数字符号的数目，称为这种进位制的基数或底数。若一个进位制的基数为 n，即可称之为 n 进位制，简称 n 进制。现在最常用的进位制是十进制，这种进位制通常使用 10 个阿拉伯数字（即 0-9 ）进行记数。
 
-<img src="images/Positional%20Notation.images/xbrrkxvq.png" alt="xbrrkxvq" style="width:80%;" />
+<div align="center"><img src="images/Positional%20Notation.images/xbrrkxvq.png" alt="xbrrkxvq" style="width:80%;" /></div>
 
 可以用不同的进位制来表示同一个数，例如十进数 57(10)，可以用二进制表示为 111001(2)，也可以用五进制表示为 212(5)，同时也可以用八进制表示为 71(8)，还可用十二进制表示为 49(12)，亦可用十六进制表示为 39(16)，它们所代表的数值都是一样的。
 
