@@ -6,6 +6,7 @@
 
 - VMware Workstation 16 Pro（16.2.3 build-19376536）
 - CentOS 7.9（CentOS-7-x86_64-DVD-2009）
+- Docker CE 26.0.0
 
 ### 权限问题
 
@@ -112,6 +113,22 @@ vim /etc/docker/daemon.json
 systemctl daemon-reload
 # step 2: 重启 docker 服务
 systemctl restart docker
+```
+
+### docker 服务自启
+
+默认情况下 docker 不会跟随系统一起启动。
+
+如果需要 docker 服务自启，则需手动将 docker 服务添加到系统的自启动服务列表中：
+
+```shell
+systemctl enable docker.service
+```
+
+如果希望取消自启动，则使用以下命令：
+
+```shell
+systemctl disable docker.service
 ```
 
 ### 启用/停用 docker
@@ -281,7 +298,7 @@ docker exec -it 16fc ls /etc/conf.d
 docker inspect [OPTIONS] CONTAINER NAME|ID [CONTAINER NAME|ID...]
 
 # 准确获取容器内的 IP 地址
-docker inspect --format='{{.NetworkSettings.IPAddress}}' {CONTAINER_NAME | CONTAINER_ID}
+docker inspect --format='{{.NetworkSettings.Networks.root_default.IPAddress}}' {CONTAINER_NAME | CONTAINER_ID}
 ```
 
 如过不使用 inspect 选项查看容器内 IP，需要首先进入容器 bash，更新 apt 并安装 net-tools，使用 ifconfig -a 命令查看容器内网络状况：

@@ -474,13 +474,7 @@ firewall-cmd --list-all
 
 注意，后续所有涉及到修改区域规则集的命令，都需要进行保存才能持久生效。**对于未保存的修改，防火墙服务或系统重启后，这些未保存的修改都会丢失。**
 
-以下命令用于保存修改：
-
-```bash
-firewall-cmd --zone=public --runtime-to-permanent
-```
-
-或者，在修改规则时加上 `--permanent` 选项：
+如果需要修改永久生效，则需要再修改规则时，加上 `--permanent` 选项：
 
 ```bash
 firewall-cmd --zone=public --remove-service=ssh --permanent
