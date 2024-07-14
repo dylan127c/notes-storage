@@ -115,6 +115,92 @@ systemctl daemon-reload
 systemctl restart docker
 ```
 
+### docker 代理
+
+如果在拉取镜像时，由于不可控原因导致镜像加速器无法使用，或不可避免地出现了网络故障，则推荐使用代理服务来解决 docker 拉取镜像的问题。
+
+CentOS 中可以使用环境变量来配置代理（不仅仅只支持以下类型的代理）：
+
+```bash
+export HTTP_PROXY="http://192.168.1.188:13766"
+export HTTPS_PROXY="http://192.168.1.188:13766"
+export NO_PROXY="localhost,127.0.0.1"
+```
+
+其中：
+
+- `HTTP_PROXY`：HTTP 代理的地址和端口；
+- `HTTPS_PROXY`：HTTPS 代理的地址和端口；
+- `NO_PROXY`：不使用代理的地址。
+
+注意，上述代理配置为临时配置，系统重启后配置会失效，且**只有 HTTP 和 HTTPS 请求才会使用该代理**。
+
+以下代码用于测试代理可用性：
+
+```shell
+curl -I https://www.google.com
+```
+
+但实际上 docker 并无法直接使用环境变量中配置的代理。因为镜像的拉取和管理都是 docker daemon 的职责，而 docker daemon 是由 systemd 管理的，因此为 docker 配置代理要从 systemd 配置入手。具体步骤如下：
+
+1. 创建 dockerd 相关的 systemd 目录，该目录下的配置将覆盖 dockerd 的默认配置：
+
+```shell
+mkdir -p /etc/systemd/system/docker.service.d
+```
+
+2. 新建配置文件 `/etc/systemd/system/docker.service.d/http-proxy.conf`，在文件中配置环境变量：
+
+```
+[Service]
+Environment="HTTP_PROXY=http://192.168.1.188:13766"
+Environment="HTTPS_PROXY=http://192.168.1.188:13766"
+```
+
+3. 代理一旦配置，则所有的请求都会优先使用代理服务。如果有需要绕过代理，则需添加 NO_PROXY 变量，例如私有的镜像仓库：
+
+```
+[Service]
+Environment="HTTP_PROXY=http://192.168.1.188:13766"
+Environment="HTTPS_PROXY=http://192.168.1.188:13766"
+Environment="NO_PROXY=localhost,127.0.0.1"
+```
+
+4. 重新加载配置并重启 docker：
+
+```shell
+systemctl daemon-reload
+systemctl restart docker
+```
+
+5. 检查及确认环境变量是否已经正确配置：
+
+```shell
+systemctl show --property=Environment docker
+```
+
+6. 在 docker info 的结果中同样可以查看代理配置项：
+
+```shell
+ ~]# docker info
+...
+ Docker Root Dir: /var/lib/docker
+ Debug Mode: false
+ HTTP Proxy: http://192.168.1.188:13766
+ HTTPS Proxy: http://192.168.1.188:13766
+ No Proxy: localhost,127.0.0.1
+ Experimental: false
+ Insecure Registries:
+  127.0.0.0/8
+...
+```
+
+完成以上配置后，同时确认代理服务可用（<u>可以使用系统环境变量结合 CURL 命令来测试代理可用性</u>），即可以通过代理正常拉取 docker 镜像。
+
+上述代理服务也可以是由 Clash Verge 等代理工具提供的局域网代理服务，这意味着如果将 docker 部署在虚拟机中，则推荐使用的虚拟网络模式为桥接模式（BRIDGE）。
+
+除此之外，如果虚拟机的宿主机上存在 TUN 代理服务，那么还可以通过 NAT 模式将 TUN 代理共享给虚拟机中的 docker 使用，这样可以避免配置 docker 环境变量，对于临时使用代理来说更加便捷。
+
 ### docker 服务自启
 
 默认情况下 docker 不会跟随系统一起启动。
