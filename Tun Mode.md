@@ -61,7 +61,7 @@ dns:
 - use-hosts：是否使用系统 hosts 文件中的域名映射；
 - listen：设定 DNS 服务监听的地址和端口。一般为 0.0.0.0:53 或 127.0.0.1:53，前者表示监听来自所有网络的 DNS 请求，后者则表示只监听来自本机网络的 DNS 请求。如果经常处于公共网络中，则建议将 listen 字段配置为后者；
 - enhanced-mode：设定增强模式。截止目前为止，仅有 redir-host 和 fake-ip 两种增强模式，且 redir-host 基本已被 fake-ip 全面取代；
-- fake-ip-range：设定虚假 IP 地址段。其中 192.18.0.1/16 表示前 16 位的网络部分保持不变，后 16 位的主机部分可以改变。因此该 IP 段可以表示 192.18.0.0 ~ 192.18.255.255 共计 65536 个 IP 地址；
+- fake-ip-range：设定虚假 IP 地址段。其中 192.18.0.1/16 表示后 16 位的主机部分可以改变。因此该 IP 段可以表示 192.18.0.0 ~ 192.18.255.255 共计 65536 个 IP 地址；
 - fake-ip-filter：设定直连的域名规则。满足这些规则的域名可以直接使用 TUN 模式提供的 DNS 解析服务进行访问；
 - default-nameserver：仅能设定 IP 式的 DNS，且仅用于解析 nameserver 或 fallback 中 DoH 或 DoT 式的 DNS。如果不在 nameserver 或 fallback 中添加 DoH 或 DoT，那么本字段可以省略；
 - nameserver：设定国内的 DNS 服务。允许设定 Do53、DoH 或 DoT 式的各种 DNS 服务；
@@ -104,8 +104,14 @@ rules:
 
 1. 浏览器发出某个域名的请求，该请求将转发至虚拟网卡；
 2. 浏览器必须接收到一个实际 IP 作为返回，fake-ip 模式下 Clash 会从虚拟 IP 池 fake-ip-range 中取出一个虚假 IP 与目标域名作映射并保存，同时将这个虚假 IP 返回给浏览器；
+
+<div align="center"><img src="images/Tun%20Mode.images/Snipaste_2024-07-30_07-58-56.png" alt="Snipaste_2024-07-30_07-58-56" style="width:80%;" /></div>
+
 3. 浏览器接收到虚假 IP 后，会立即对该 IP 发起网络请求；
+
 4. 请求将再次来到虚拟网卡，通过查询映射表可以从中检索真实域名，域名将根据规则分流。
+
+其实，这就相当于使用虚假的 IP 作为真实 DOMAIN 的索引，以欺骗浏览器，让真实域名能够使用分流规则。
 
 ### 解析场景
 

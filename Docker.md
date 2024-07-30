@@ -115,7 +115,7 @@ systemctl daemon-reload
 systemctl restart docker
 ```
 
-### docker 代理
+### docker 代理服务
 
 如果在拉取镜像时，由于不可控原因导致镜像加速器无法使用，或不可避免地出现了网络故障，则推荐使用代理服务来解决 docker 拉取镜像的问题。
 
