@@ -7,6 +7,18 @@
 - Windows 11 23H2 22631.3007
 - Git 2.40.0 64bit
 
+### 重要配置
+
+默认配置下 Git 会在拉取仓库或提交内容的时候，自动根据系统类型执行行尾符（换行符）的替换。例如在 Windows 系统上提交一个文件时，Git 会自动将文件内所有的 LF 替换为 Windows 系统支持的行尾符（换行符）CRLF。
+
+实际这并不是一种很好的情况，因为大多数 Windows 系统下的代码编辑器本身是支持 LF 换行符的。为了避免不必要的错误，这里建议在 Windows 系统下使用 Git 工具时禁用换行符自动转换功能：
+
+```bash
+git config --global core.autocrlf false
+```
+
+如果使用的是 Linux 系统，则不建议禁用该功能，因为大概率是不会产生影响的。
+
 ### 安装过程
 
 其中 Windows Explorer Integration 决定了 Git 是否在 Windows 的右键菜单中集成 Git 选项：
