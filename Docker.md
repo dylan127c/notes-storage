@@ -62,6 +62,22 @@ sudo yum install -y yum-utils
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 ```
 
+上述软件源可能会遇到网络连通性问题，那么可以为 `yum` 命令提供代理：
+
+```bash
+echo "proxy=http://192.168.1.188:13766" >> /etc/yum.conf
+```
+
+注意 VMWare 桥接模式下不使用 TUN 提供的虚拟网卡，因此需要上述配置让 `yum` 的流量能够导向代理服务，但是否能顺利连接取决于实际的分流规则。
+
+简单来说，就是需要在将 `https://download.docker.com` 交给代理服务。
+
+但如果遇到类似于源下架等生命周期结束行为，那么网络连通性将无法解决。为了避免麻烦，建议使用阿里源：
+
+```bash
+sudo yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+```
+
 其中 `yum-utils` 是一个 CentOS 或 Red Hat Enterprise Linux (RHEL) 等系统上的一个工具集合，用于增强和扩展 YUM 包管理器的功能。它包含了一系列的命令行工具，可以帮助用户更有效地管理软件包。
 
 这里只使用了 `yum-utils` 工具集中 `yum-config-manager` 工具来添加新的 yum 软件源，这里添加的是 docker-ce 源。
