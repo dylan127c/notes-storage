@@ -20,26 +20,16 @@ Clash 配置文件中常见的 DNS 配置：
 dns:
   enable: false
   ipv6: false
-  use-hosts: true
+  use-hosts: false
   listen: 0.0.0.0:53
   enhanced-mode: fake-ip
   fake-ip-range: 192.18.0.1/16
   fake-ip-filter:
-    - "*.lan"
-    - localhost.ptlogin2.qq.com
-    - +.stun.*.*
-    - +.stun.*.*.*
-    - +.stun.*.*.*.*
-    - +.stun.*.*.*.*.*
-    - "*.n.n.srv.nintendo.net"
-    - +.stun.playstation.net
-    - xbox.*.*.microsoft.com
-    - "*.*.xboxlive.com"
-    - "*.msftncsi.com"
-    - "*.msftconnecttest.com"
-    - "*.logon.battlenet.com.cn"
-    - "*.logon.battle.net"
-    - WORKGROUP
+    - +.msftncsi.com
+    - +.msftconnecttest.com
+    - +.time.windows.com
+    - +.ipv6.microsoft.com
+    - +.lan
   default-nameserver:
     - 119.29.29.29
     - 119.28.28.28
@@ -58,10 +48,10 @@ dns:
 
 - enable：是否启用 dns 配置。非 TUN 模式下建议设置为 false 以启用本地的 DNS 解析服务；启用 TUN 模式时，该值会被自动设置为 true；
 - ipv6：是否启用 ipv6 网络协议。该协议一般需要网络运营商和路由器的同时支持，访问 [IPv6 连接测试](https://test-ipv6.com/) 可以查看是否具有 ipv6 网络；
-- use-hosts：是否使用系统 hosts 文件中的域名映射；
+- use-hosts：是否使用配置提供的 hosts 域名映射，还有个 use-system-hosts 配置，用于设置是否遵循系统 hosts 文件中的域名映射；
 - listen：设定 DNS 服务监听的地址和端口。一般为 0.0.0.0:53 或 127.0.0.1:53，前者表示监听来自所有网络的 DNS 请求，后者则表示只监听来自本机网络的 DNS 请求。如果经常处于公共网络中，则建议将 listen 字段配置为后者；
 - enhanced-mode：设定增强模式。截止目前为止，仅有 redir-host 和 fake-ip 两种增强模式，且 redir-host 基本已被 fake-ip 全面取代；
-- fake-ip-range：设定虚假 IP 地址段。其中 192.18.0.1/16 表示后 16 位的主机部分可以改变。因此该 IP 段可以表示 192.18.0.0 ~ 192.18.255.255 共计 65536 个 IP 地址；
+- fake-ip-range：设定虚假 IP 地址段。其中 192.18.0.1/16 段中的 /16 可以简单理解二进制格式下，IP 地址的前 16 位主机部分不可改变。因此该 IP 段可以表示 192.18.0.0 ~ 192.18.255.255 共计 65536 个 IP 地址；
 - fake-ip-filter：设定直连的域名规则。满足这些规则的域名可以直接使用 TUN 模式提供的 DNS 解析服务进行访问；
 - default-nameserver：仅能设定 IP 式的 DNS，且仅用于解析 nameserver 或 fallback 中 DoH 或 DoT 式的 DNS。如果不在 nameserver 或 fallback 中添加 DoH 或 DoT，那么本字段可以省略；
 - nameserver：设定国内的 DNS 服务。允许设定 Do53、DoH 或 DoT 式的各种 DNS 服务；
@@ -214,26 +204,16 @@ fallback-filter:
 dns:
   enable: false
   ipv6: false
-  use-hosts: true
+  use-hosts: false
   listen: 0.0.0.0:53
   enhanced-mode: fake-ip
   fake-ip-range: 192.18.0.1/16
   fake-ip-filter:
-    - "*.lan"
-    - localhost.ptlogin2.qq.com
-    - +.stun.*.*
-    - +.stun.*.*.*
-    - +.stun.*.*.*.*
-    - +.stun.*.*.*.*.*
-    - "*.n.n.srv.nintendo.net"
-    - +.stun.playstation.net
-    - xbox.*.*.microsoft.com
-    - "*.*.xboxlive.com"
-    - "*.msftncsi.com"
-    - "*.msftconnecttest.com"
-    - "*.logon.battlenet.com.cn"
-    - "*.logon.battle.net"
-    - WORKGROUP
+    - +.msftncsi.com
+    - +.msftconnecttest.com
+    - +.time.windows.com
+    - +.ipv6.microsoft.com
+    - +.lan
   default-nameserver:
     - 119.29.29.29
     - 119.28.28.28
