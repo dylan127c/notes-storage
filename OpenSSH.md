@@ -114,10 +114,10 @@ ssh root@hostname
 - 通过 `~/.ssh/config` 文件指定本地连接所使用的私钥的存储位置；
 - 将私钥交给 `ssh-agent` 程序管理，以自动选择合适的私钥用于身份验证。
 
-假设已经将 `id.rsa.pub` 公钥上传至 `github.com` 中，使用命令行参数可以指定私钥以用于身份验证：
+假设已经将 `id_rsa.pub` 公钥上传至 `github.com` 中，使用命令行参数可以指定私钥以用于身份验证：
 
 ```
-~]# ssh -T git@github.com -i ~/.ssh/id.rsa
+~]# ssh -T git@github.com -i ~/.ssh/id_rsa
 Hi dylan127c! You've successfully authenticated, but GitHub does not provide shell access.
 ```
 
@@ -134,7 +134,7 @@ Hi xxxx! You've successfully authenticated, but GitHub does not provide shell ac
 ```
 Host github.com
     HostName %h
-	IdentityFile ~/.ssh/id.rsa
+	IdentityFile ~/.ssh/id_rsa
 ```
 
 其中：

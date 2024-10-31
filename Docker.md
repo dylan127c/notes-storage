@@ -131,6 +131,10 @@ systemctl daemon-reload
 systemctl restart docker
 ```
 
+关于 docker desktop 中 mirror 设置：
+
+<div align="center"><img src="images/Docker.images/Snipaste_2024-10-31_12-23-56.png" alt="Snipaste_2024-10-31_12-23-56" style="width:80%;" /></div>
+
 ### docker 代理服务
 
 如果在拉取镜像时，由于不可控原因导致镜像加速器无法使用，或不可避免地出现了网络故障，则推荐使用代理服务来解决 docker 拉取镜像的问题。
@@ -435,3 +439,44 @@ firewall-cmd --reload
 ```
 
 来自于宿主机局域网中的其他 docker 容器的连接，可以直接通过宿主机 IP 地址及其对应的宿主机映射端口访问到容器中提供的服务，毋需开启宿主机映射端口的防火墙权限。
+
+### docker desktop
+
+docker desktop 是 docker 提供的一款本地开发环境工具，适用于 Windows、Linux 和 macOS 系统，旨在帮助开发者在本地机器上运行、测试和管理容器化应用。
+
+简单来说，它就是一款可视化的管理工具，不过以应用的形式出现在 Windows、Linux 和 macOS 系统上，下面主要说一下 Windows 系统下的一些细节。
+
+Windows 系统下推荐使用 WSL2 作为 docker 容器的虚拟化技术，性能较好。使用 WSL2 不需要在 Windows 功能中启用 Hyper-V 功能，尽管 WSL2 有依赖部分的 Hyper-V 技术。
+
+docker desktop 安装完毕后，会自动创建一个名为“docker-desktop”的 WSL2 系统：
+
+```
+> wsl --list --verbose
+  NAME              STATE           VERSION
+* docker-desktop    Running         2
+  Ubuntu-22.04      Stopped         2
+```
+
+这里推荐使用以下命令将其设置为默认的 Linux 发行版：
+
+```bash
+wsl --set-default 'docker-desktop'
+```
+
+如果 docker desktop 存在的同时不将其对应的 WSL 系统设置为默认的 Linux 发行版，那么 docker desktop 运行时，默认的 Linux 发行版会一并启动，切换完毕后推荐重启系统再进行容器的配置。
+
+上述情况已经将 docker-desktop 设置为默认的 Linux 发行版，因此 Ubuntu-22.04 不会被启动。
+
+另外，使用 docker desktop 时，还是推荐直接使用命令行来执行 docker 运行容器的命令。虽然具有 GUI 界面，但大多数参数只有命令行支持配置，例如运行 MySQL 容器的命令：
+
+```bash
+docker create --name=my_database --restart=always --privileged=true -e MYSQL_ROOT_PASSWORD=0217 -e TZ=Asia/Shanghai -v ~/mysql/conf.d:/etc/mysql/conf.d -p 3306:3306 mysql:latest
+```
+
+图形化界面不支持配置 --restart=always 和 --privileged=true 等参数，并且只有 --restart=always 支持使用 docker update 来后补参数配置：
+
+```bash
+docker update --restart=always 08eaaa72ca81
+```
+
+因此，为了避免不必要的麻烦，推荐使用 docker terminal 来执行 docker 运行容器的命令，其余命令可根据个人喜好自行决定是否使用命令行。另外容器删除后如需再创建则推荐重启，以免出现端口被占用或其他未知问题。
