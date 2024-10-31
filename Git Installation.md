@@ -115,6 +115,56 @@ ssh -T git@github.com
 
 <div align="center"><img src="images/Git%20Installation.images/Snipaste_2024-03-14_13-18-50.png" alt="Snipaste_2024-03-14_13-18-50" style="width:80%;" /></div>
 
+### 软件更新
+
+Windows 系统下可以使用命令行来更新 Git，在更新前需要查看版本信息：
+
+```bash
+git --version
+```
+
+如果 Git 版本是 2.17.1 之前（不包括），更新命令为：
+
+```bash
+git update
+```
+
+如果 Git 版本是 2.17.1 之后（包括），则更新命令为：
+
+```bash
+git update-git-for-windows
+```
+
+例如 2.47.0 版本可以使用后者进行更新：
+
+```
+> git --version
+git version 2.45.1.windows.1
+> git update-git-for-windows
+Git for Windows 2.45.1.windows.1 (64-bit)
+Update 2.47.0.windows.2 is available
+Download and install Git for Windows v2.47.0.windows.2 [N/y]? y
+...
+```
+
+稍微需要注意的地方是，完成最新版本的下载后，安装程序会自动运行，此时可能出现一个提示（错误）窗口描述关于 sh.exe 相关程序的错误信息。
+
+这里是因为更新需要替换 Git 安装目录下的某些可执行程序文件，而当前终端正在使用 Git 所以某些程序处于被占用状态，那么相关的文件自然无法完成替换。
+
+此时只需要先关闭终端，之后选择提示窗口提供的“重试”选项即可。后续 Git 安装程序会自动重新运行，并完成新版本的安装。
+
+```
+> git --version
+git version 2.47.0.windows.2
+```
+
+另外，安装不会改变 Git 原本的安装路径，可通过 `where.exe` 命令验证：
+
+```
+> where.exe git.exe
+E:\Git\cmd\git.exe
+```
+
 ### 其他问题
 
 如果在 Git Bash 执行 OpenSSH 命令但未能执行完毕时，可能会出现某些 OpenSSH 相关的错误。
