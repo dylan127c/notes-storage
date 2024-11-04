@@ -1249,7 +1249,7 @@ mysql> SELECT username.id as id, username.user_name as user_name, useraddress.us
 2 rows in set (0.00 sec)
 ```
 
-内联结实际上就是数据表基于联结条件的交集，其中 INNER JOIN 关键字中 INNER 可以省略不写。
+**内联结实际上就是数据表基于联结条件的交集，其中 INNER JOIN 关键字中 INNER 可以省略不写。**
 
 #### 2. 左联结
 
