@@ -127,7 +127,7 @@ wsl --install
 该命令实际等同于：
 
 ```shell
-wsl --install --distribution 'Ubuntu'
+wsl --install --distribution Ubuntu
 ```
 
 因为这里默认的 Linux 发行版就是 Ubuntu 发行版。其中
@@ -156,7 +156,7 @@ wsl --list --online
 选择适合自己的 Linux 发行版安装即可，例如指定安装 Ubuntu-22.04 发行版：
 
 ```shell
-wsl --install -d 'Ubuntu-22.04'
+wsl --install -d Ubuntu-22.04
 ```
 
 安装完毕需要重启计算机以应用修改，重启后 WSL 会自动启动并进入用户名称和密码的配置：
@@ -206,7 +206,7 @@ wsl --set-default <distrubution name>
 如果需要将默认启动的发行版更改为 Ubuntu-20.04 那么只需要运行命令：
 
 ```bash
-wsl --set-default 'Ubuntu-20.04'
+wsl --set-default Ubuntu-20.04
 ```
 
 <div align="center"><img src="images/Windows%20Subsystem%20for%20Linux.images/Snipaste_2024-03-12_18-26-20.png" alt="Snipaste_2024-03-12_18-26-20" style="width:80%;" /></div>
@@ -240,7 +240,7 @@ wsl --set-version <distribution name> <versionNumber>
 在上述例子中，需要运行命令：
 
 ```shell
-wsl --set-version 'Ubuntu-22.04' '2'
+wsl --set-version Ubuntu-22.04 2
 ```
 
 WSL 版本的转换需要一定的时间：
@@ -270,7 +270,7 @@ wsl --import <Distribution Name> <InstallLocation> <FileName>
 以 Ubuntu-22.04 为例，需要将它导出至系统磁盘，则运行以下命令：
 
 ```shell
-wsl --export 'Ubuntu-22.04' 'C:\Ubuntu-22.04.tar'
+wsl --export Ubuntu-22.04 C:\Ubuntu-22.04.tar
 ```
 
 <div align="center"><img src="images/Windows%20Subsystem%20for%20Linux.images/Snipaste_2024-03-12_18-30-40.png" alt="Snipaste_2024-03-12_18-30-40" style="width:80%;" /></div>
@@ -278,7 +278,7 @@ wsl --export 'Ubuntu-22.04' 'C:\Ubuntu-22.04.tar'
 后续如果需要将 Ubuntu-22.04 重新导入 WSL 中，则运行以下命令：
 
 ```shell
-wsl --import 'My-Ubuntu' 'I:\Virtual Machine' 'C:\Ubuntu-22.04.tar'
+wsl --import My-Ubuntu 'I:\Virtual Machine' C:\Ubuntu-22.04.tar
 ```
 
 <div align="center"><img src="images/Windows%20Subsystem%20for%20Linux.images/Snipaste_2024-03-12_18-31-21.png" alt="Snipaste_2024-03-12_18-31-21" style="width:80%;" /></div>
@@ -300,7 +300,7 @@ wsl --unregister <DistributionName>
 以 My-Ubuntu 发行版为例，卸载它需要运行命令：
 
 ```shell
-wsl --unregister 'My-Ubuntu'
+wsl --unregister My-Ubuntu
 ```
 
 <div align="center"><img src="images/Windows%20Subsystem%20for%20Linux.images/Snipaste_2024-03-12_18-33-41.png" alt="Snipaste_2024-03-12_18-33-41" style="width:80%;" /></div>
@@ -334,7 +334,7 @@ wsl --terminate <distribution name>
 例如，仅终止 Ubuntu-20.04 发行版的运行：
 
 ```shell
-wsl --terminate 'Ubuntu-20.04'
+wsl --terminate Ubuntu-20.04
 ```
 
 **实际上，退出 Linux Bash 之后对应的 Linux 发行版会在数秒后自动停止运行。**
