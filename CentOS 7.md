@@ -309,6 +309,9 @@ mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
 
 # step 2: 下载阿里源并将其命名为 CentOS-Base.repo
 wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+
+# step 3：可以刷新一下源
+sudo yum makecache
 ```
 
 但 CentOS 7 中提供了 `fastestmirror` 插件功能。当 `fastestmirror` 插件启用时，`yum` 会检测及测量可用镜像源的速度，并根据速度选择最快的镜像源进行下载。
