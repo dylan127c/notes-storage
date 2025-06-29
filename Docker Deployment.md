@@ -535,3 +535,56 @@ mysql> SHOW VARIABLES LIKE 'collation%';
 这里只需要记住常用的排序字符集有 `utf8mb4_unicode_ci`、`utf8mb4_general_ci` 和 `utf8mb4_0900_ai_ci` 即可，其中 `utf8mb4_0900_ai_ci` 是 MySQL 8.0 之后默认使用的排序字符集。
 
 本篇使用的是 MySQL 8.3.0 版本，在字符集配置为 `utf8mb4` 时，默认使用 `utf8mb4_0900_ai_ci` 排序字符集。
+
+#### 10. 授权验证
+
+Docker 中部署 MySQL 实际不需要管是否拥有访问权限，都是容器内访问。但如果是单独部署的 MySQL，则需要为指定的用户、地址添加访问权限。
+
+**授权法（MySQL 8.0）：**
+
+- 所有 IP 可访问：
+
+```mysql
+CREATE USER 'root'@'%' IDENTIFIED BY '0217';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+
+ALTER USER 'root'@'%' IDENTIFIED BY '0217';
+```
+
+- 指定 IP 可访问：
+
+```mysql
+CREATE USER 'root'@'192.168.1.188' IDENTIFIED BY '88888888';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.1.188';
+
+ALTER USER 'root'@'192.168.1.188' IDENTIFIED BY '88888888';
+```
+
+**改表法（变种）：**
+
+```mysql
+USE mysql;
+SELECT user, host FROM user WHERE user='root';
+UPDATE user SET host='%' WHERE user='root' AND host='localhost';
+```
+
+```mysql
+UPDATE user SET host='localhost' WHERE user='root' AND host='%';
+```
+
+从查表的结果来看，实际授权法等同于改表法：
+
+```
+mysql> SELECT User, Host FROM mysql.user;
++------------------+---------------+
+| User             | Host          |
++------------------+---------------+
+| root             | %             |
+| root             | 192.168.1.188 |
+| mysql.infoschema | localhost     |
+| mysql.session    | localhost     |
+| mysql.sys        | localhost     |
+| root             | localhost     |
++------------------+---------------+
+6 rows in set (0.00 sec)
+```
