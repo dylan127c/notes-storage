@@ -108,6 +108,55 @@ git@github.com: Permission denied (publickey).
 ssh: connect to host github.com port 22: Connection timed out
 ```
 
+##### 安全连接
+
+无法建立连接时，比较推荐直接借用代理服务建立连接，不过也可以尝试启用通过 HTTPS 的 SSH 连接。
+
+首先测试通过 HTTPS 端口的 SSH 连接是否可行：
+
+```bash
+~]# ssh -T 'git@ssh.github.com' -p 443
+Hi dylan127c! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+如果可行，可以覆盖 SSH 设置来强制与 github.com 的任何连接均使用 ssh.github.com 服务器和 443 端口：
+
+```
+Host github.com
+	HostName ssh.github.com
+	Port 443
+	User git
+	IdentityFile ~/.ssh/for_connect
+```
+
+注意 SSH 配置的覆盖原则，它总是根据 Host 匹配，并在命令不提供默认参数的情况下使用配置覆盖。例如：
+
+```bash
+ssh -T 'github.com'
+```
+
+等价于：
+
+```bash
+ssh -T 'git@ssh.github.com' -p 443 -i '~/.ssh/for_connect'
+```
+
+如果命令原本就带有配置内提供的默认参数，那么配置将不会覆盖命令。例如：
+
+```bash
+ssh -T 'dylan@github.com' -p 23
+```
+
+等价于：
+
+```bash
+ssh -T 'dylan@ssh.github.com' -p 23 -i '~/.ssh/for_connect'
+```
+
+只要 Host 能匹配就会尝试覆盖未提供的参数，如果 Host 匹配了但参数已提供，则不会使用配置覆盖。
+
+##### 代理连接
+
 OpenSSH 可以通过 `ProxyCommand` 参数，实现通过代理服务建立 SSH 连接：
 
 ```bash

@@ -207,7 +207,9 @@ docker-compose-plugin.x86_64    2.25.0-1.el7                   @docker-ce-stable
 
 如果系统中存在 docker-compose-plugin 程序，则意味着容器编排可用。
 
-容器编排依赖 `.yml` 编排文件，一种约定俗成的命名是 `docker-compose.yml` 文件，但这并不意味着不能以其他方式命名。所谓编排文件，可以简单理解为将创建容器的命令转换成 yaml 格式后的文件，例如：
+容器编排依赖 `.yml` 编排文件，一种约定俗成的命名是 `docker-compose.yml` 文件，但这并不意味着不能以其他方式命名。
+
+所谓编排文件，可以简单理解为将创建容器的命令转换成 yaml 格式后的文件，例如：
 
 ```bash
 docker create --name=my_database --restart=always --privileged=true -e MYSQL_ROOT_PASSWORD=0217 -e TZ=Asia/Shanghai -v ~/mysql/conf.d:/etc/mysql/conf.d -p 3306:3306 mysql:latest

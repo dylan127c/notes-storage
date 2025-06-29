@@ -283,7 +283,7 @@ sudo sed -i 's/^GATEWAY=.*/GATEWAY="192.168.1.1"/' /etc/sysconfig/network-script
 - 虚拟机网络配置中，桥接模式未选择正确的网卡（默认自动选择网卡有时候会导致无法连接的情况）；
 - 存在多个以 `ifcfg-ens33` 开头命名的配置文件，某些系统可能将错误的配置文件识别为网络配置文件。
 
-关于最后一点，假如 `network-scripts` 目录下同时存在 ifcfg-ens33 和 ifcfg-ens33-bridge 文件，原计划时前者负责 NAT 模式，后者负责 BRIDGE 模式，只在需要切换模式时再重新命名配置文件。
+关于最后一点，假如 `network-scripts` 目录下同时存在 ifcfg-ens33 和 ifcfg-ens33-bridge 文件，原计划是前者负责 NAT 模式，后者负责 BRIDGE 模式，只在需要切换模式时再重新命名配置文件。
 
 理想的情况下，系统应当识别 ifcfg-ens33 为网络配置文件。但实际情况并非如此，在采用 NAT 模式为网络适配器时，实测 CentOS 7.9 系统会错误地将 ifcfg-ens33-bridge 识别为网络配置文件，导致系统崩溃。
 

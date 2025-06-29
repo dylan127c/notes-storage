@@ -328,7 +328,7 @@ Host github.com
     ProxyCommand e:/git/mingw64/bin/connect -S 127.0.0.1:13766 %h %p
 ```
 
-这意味着别名 `Host` 与主机名称 `HostName` 一致，且在连接 `github.com` 时必须提供用户名称（git）：
+这表示别名 `Host` 与主机名称 `HostName` 一致，由于 User 用户名称不存在默认值，因此在使用 Host 连接时至少还需要提供用户名称（git）：
 
 ```bash
 # 使用 Host（别名）连接
@@ -346,7 +346,7 @@ Host github.com
     ProxyCommand e:/git/mingw64/bin/connect -S 127.0.0.1:13766 %h %p
 ```
 
-默认情况下 `HostName` 即为 `Host`、端口即为 22，因此 `HostName` 和 `Port` 均可省略。
+一般来说 `HostName` 的默认值为 `Host`，`Port` 的默认值为 22，因此 `HostName` 和 `Port` 均可省略。
 
 SSH 客户端配置文件中存在“Host 块”的概念。每个“Host 块”包含一个或多个主机别名及其相关的配置选项。一个“Host 块”以 `Host` 关键字开头，后面跟着主机别名，然后是该主机的相关配置选项。例如：
 
@@ -360,7 +360,9 @@ Host example
 
 在这个示例中，`Host example` 就是一个“Host 块”，它包含主机别名为 `example` 的主机及其相关的配置选项。
 
-另外，大多数情况下 SSH 客户端配置文件是不区分大小写的，但一些选项可能是大小写敏感的，这取决于具体的选项和实现。为了提高可读性，建议按照约定俗成的方式书写配置文件，但不必担心大小写问题。
+大多数情况下 SSH 客户端配置文件是不区分大小写的，但一些选项可能是大小写敏感的，这取决于具体的选项和实现。为了提高可读性，建议按照约定俗成的方式书写配置文件，但不必担心大小写问题。
+
+### GitHub 安全连接
 
 最后关联一个和 GitHub 相关的 SSH 连接知识，一般来说会选用默认的 22 端口和 GitHub 建立 SSH 连接：
 
@@ -390,6 +392,18 @@ Host ssh.github.com
 ```bash
 ssh -T 'git@ssh.github.com'
 ```
+
+如果不希望修改项目内的 `git@github.com` 项目连接地址，但同时想使用 `ssh.github.com` 的 443 端口，那么还可以选择为 `ssh.github.com` 配置别名 `github.com`：
+
+```
+Host github.com
+	HostName ssh.github.com
+	Port 443
+	IdentityFile ~/.ssh/for_connect
+	ProxyCommand e:/git/mingw64/bin/connect -S 127.0.0.1:13766 %h %p
+```
+
+这样 `github.com` 将被作为 `Host` 别名对待，并被替换为 `ssh.github.com` 地址（`HostName`）。
 
 关于 `github.com` 和 `ssh.github.com` 两个远程主机，可以简单理解为这两个远程主机都可以直接访问到仓库数据，这里只需要关心对应的域名使用什么端口（22 或 443）才能与远程主机建立 SSH 连接即可。
 
